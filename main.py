@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-import random
 from os import path
 
 from settings import *
@@ -58,7 +57,6 @@ class Game:
                     self.enemy = Enemy(self, col, row)
                 if tile == '1':
                     Wall(self, col, row)
-        self.run()
 
     def run(self):
         self.playing = True
@@ -93,11 +91,14 @@ class Game:
                         self.playing = False
                     self.running = False
 
+            # Take Turns
+            if self.state == 'player turn':
                 self.player.take_turn(game, event)
-
-                #implement more logic structure to advance turns
+            elif self.state == 'enemy turn':
                 for mob in self.mobs:
                     mob.take_turn(game)
+                self.player.start_turn()
+                self.end_enemy_turn()
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
@@ -106,11 +107,30 @@ class Game:
         for y in range(0, HEIGHT, TILESIZE):
             pygame.draw.line(self.screen, WHITE, (0, y), (WIDTH, y))
 
+    # Double Check This Function / Make Better
+    def draw_health_bar(self, self_screen, x, y, percentage):
+        if percentage < 0:
+            percentage = 0
+        BAR_LENGTH = 100
+        BAR_HEIGHT = 10
+        filled = (percentage / 100) * BAR_LENGTH
+        outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+        filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
+        pygame.draw.rect(self_screen, GREEN, filled_rect)
+        pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
+
     def draw(self):
+        # SHOW FPS IN TITLE BAR WHILE TESTING
+        pygame.display.set_caption("{:.2f}".format(self.clock.get_fps()))
+
         # DRAW EVERYTHING FOR ONE FRAME
         self.screen.fill(BLACK)
+
+        self.player.draw_move_area()
+
         self.all_sprites.draw(self.screen)
         self.draw_grid()
+        self.draw_health_bar(self.screen, 5, 5, self.player.hit_points)
 
 
         # DISPLAY FRAME = STOP DRAWING
@@ -129,8 +149,11 @@ class Game:
 
 game = Game()
 game.show_start_screen()
+
 while game.running:
     game.new()
+    game.run()
+
     game.show_end_screen()
 
 pygame.quit()

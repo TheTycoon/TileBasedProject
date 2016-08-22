@@ -48,34 +48,61 @@ class Player(Actor, pygame.sprite.Sprite):
         Actor.__init__(self, game, x, y)
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
+        self.initial_x = x
+        self.initial_y = y
         self.image.fill(WHITE)
         self.hit_points = 100
         self.attack_power = 10
+        self.move_range = 2
         self.turn = 0
 
+    def start_turn(self):
+        self.initial_x = self.x
+        self.initial_y = self.y
+
+    def draw_move_area(self):
+        for i in range(0, self.move_range + 1):
+            for j in range(0, self.move_range + 1):
+                if i + j <= self.move_range:
+                    pygame.draw.rect(self.game.screen, RED,
+                                     ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
+                                      TILESIZE, TILESIZE))
+                    pygame.draw.rect(self.game.screen, RED,
+                                     ((self.initial_x + i) * TILESIZE, (self.initial_y - j) * TILESIZE,
+                                      TILESIZE, TILESIZE))
+                    pygame.draw.rect(self.game.screen, RED,
+                                     ((self.initial_x - i) * TILESIZE, (self.initial_y + j) * TILESIZE,
+                                      TILESIZE, TILESIZE))
+                    pygame.draw.rect(self.game.screen, RED,
+                                     ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
+                                      TILESIZE, TILESIZE))
+
     def take_turn(self, game, event):
-        # player movement
-        if event.key == pygame.K_LEFT:
-            self.move(dx=-1)
-            self.turn += 1
-        if event.key == pygame.K_RIGHT:
-            self.move(dx=1)
-            self.turn += 1
-        if event.key == pygame.K_UP:
-            self.move(dy=-1)
-            self.turn += 1
-        if event.key == pygame.K_DOWN:
-            self.move(dy=1)
-            self.turn += 1
+        if event.type == pygame.KEYDOWN:
+            # player movement
+            if event.key == pygame.K_LEFT and abs(self.initial_x - (self.x - 1)) + abs(self.initial_y - self.y) <= self.move_range:
+                self.move(dx=-1)
+            if event.key == pygame.K_RIGHT and abs(self.initial_x - (self.x + 1)) + abs(self.initial_y - self.y) <= self.move_range:
+                self.move(dx=1)
+            if event.key == pygame.K_UP and abs(self.initial_y - (self.y - 1)) + abs(self.initial_x - self.x) <= self.move_range:
+                self.move(dy=-1)
+            if event.key == pygame.K_DOWN and abs(self.initial_y - (self.y + 1)) + abs(self.initial_x - self.x) <= self.move_range:
+                self.move(dy=1)
 
-        # player attack
-        if event.key == pygame.K_a:
 
-            for mob in game.mobs:
-                if (abs(self.x - mob.x) == 1 and abs(self.y - mob.y) == 0) or \
-                        (abs(self.x - mob.x) == 0 and abs(self.y - mob.y) == 1):
-                    self.attack(mob)
-                    self.turn += 1
+            # player attack
+            if event.key == pygame.K_a:
+
+                for mob in game.mobs:
+                    if (abs(self.x - mob.x) == 1 and abs(self.y - mob.y) == 0) or \
+                            (abs(self.x - mob.x) == 0 and abs(self.y - mob.y) == 1):
+                        self.attack(mob)
+                        self.turn += 1
+                        game.end_player_turn()
+
+            if event.key == pygame.K_SPACE:
+                self.turn += 1
+                game.end_player_turn()
 
 
 class Enemy(Actor, pygame.sprite.Sprite):
@@ -87,6 +114,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
         self.hit_points = 10
         self.attack_power = 10
 
+# Mob AI movement needs to be refined still
     def take_turn(self, game):
         if (abs(self.x - game.player.x) == 1 and abs(self.y - game.player.y) == 0) or \
                 (abs(self.x - game.player.x) == 0 and abs(self.y - game.player.y) == 1):
