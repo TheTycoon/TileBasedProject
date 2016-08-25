@@ -29,16 +29,20 @@ class Game:
         self.machine.add_transition('end_enemy_turn', 'enemy turn', 'player turn')
 
     def load_data(self):
-        # load all image and sound files
-
-        # Easy name to start file directory
+        # Easy names to start file directories
         game_folder = path.dirname(__file__)
+        img_folder = path.join(game_folder, 'img')
+
+        # load all image and sound files
+        self.attack_icon = pygame.image.load(path.join(img_folder, 'sword1.png')).convert_alpha()
 
         # Load map from text file
         self.map_data = []
         with open(path.join(game_folder, 'map.txt'), 'rt') as file:
             for line in file:
                 self.map_data.append(line)
+
+
 
     def new(self):
         # start a new game
@@ -118,6 +122,27 @@ class Game:
         filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
         pygame.draw.rect(self_screen, GREEN, filled_rect)
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
+        self.draw_text(self.screen, "Health", 12, WIDTH - 130, HEIGHT - 36)
+
+    def draw_ui(self):
+        pygame.draw.rect(self.screen, GRAY, (0, HEIGHT - 40, WIDTH, 40))
+        for i in range(8):
+            pygame.draw.rect(self.screen, BLUE, (5 + 37 * i, HEIGHT - 36, 32, 32))
+            self.draw_text(self.screen, str(i + 1), 12, 10 + 37 * i, HEIGHT - 36)
+        attack_icon = self.attack_icon
+        attack_rect = attack_icon.get_rect()
+        attack_rect.x = 5
+        attack_rect.y = HEIGHT - 36
+        self.screen.blit(attack_icon, attack_rect)
+
+    # function to handle drawing all types text
+    def draw_text(self, surface, text, size, x, y):
+        font = pygame.font.Font(FONT, size)
+        text_surface = font.render(text, True, WHITE)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)  # centers the text
+        surface.blit(text_surface, text_rect)
+
 
     def draw(self):
         # SHOW FPS IN TITLE BAR WHILE TESTING
@@ -126,11 +151,14 @@ class Game:
         # DRAW EVERYTHING FOR ONE FRAME
         self.screen.fill(BLACK)
 
-        self.player.draw_move_area()
+        if self.state == 'player turn':
+            self.player.draw_move_area()
 
         self.all_sprites.draw(self.screen)
         self.draw_grid()
-        self.draw_health_bar(self.screen, 5, 5, self.player.hit_points)
+        self.draw_ui()
+        self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.hit_points)
+
 
 
         # DISPLAY FRAME = STOP DRAWING

@@ -32,7 +32,6 @@ class Actor:
         mob_collide = False
         for mob in self.game.mobs:
             if self.collide_with_enemy(mob, dx, dy):
-                self.attack(mob)
                 mob_collide = True
         if not self.collide_with_walls(dx, dy) and not mob_collide:
             self.x += dx
@@ -50,7 +49,7 @@ class Player(Actor, pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.initial_x = x
         self.initial_y = y
-        self.image.fill(WHITE)
+        self.image.fill(BLUE)
         self.hit_points = 100
         self.attack_power = 10
         self.move_range = 2
@@ -64,16 +63,16 @@ class Player(Actor, pygame.sprite.Sprite):
         for i in range(0, self.move_range + 1):
             for j in range(0, self.move_range + 1):
                 if i + j <= self.move_range:
-                    pygame.draw.rect(self.game.screen, RED,
+                    pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, RED,
+                    pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, RED,
+                    pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, RED,
+                    pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
 
@@ -90,9 +89,8 @@ class Player(Actor, pygame.sprite.Sprite):
                 self.move(dy=1)
 
 
-            # player attack
-            if event.key == pygame.K_a:
-
+            # player attack push '1'
+            if event.key == pygame.K_1:
                 for mob in game.mobs:
                     if (abs(self.x - mob.x) == 1 and abs(self.y - mob.y) == 0) or \
                             (abs(self.x - mob.x) == 0 and abs(self.y - mob.y) == 1):
@@ -110,7 +108,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
         Actor.__init__(self, game, x, y)
         self.groups = game.all_sprites, game.mobs
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image.fill(YELLOW)
+        self.image.fill(RED)
         self.hit_points = 10
         self.attack_power = 10
 
@@ -141,7 +139,7 @@ class Wall(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         game = game
         self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLUE)
+        self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
