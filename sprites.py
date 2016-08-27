@@ -14,7 +14,7 @@ class Actor:
 
     def attack(self, target):
         target.hit_points -= self.attack_power
-        if target.hit_points == 0:
+        if target.hit_points <= 0:
             target.kill()
 
     def collide_with_walls(self, dx=0, dy=0):
@@ -43,6 +43,9 @@ class Actor:
 
 
 class Player(Actor, pygame.sprite.Sprite):
+    # Define States for State Machine
+    states = ['moving', 'action', 'inactive']
+
     def __init__(self, game, x, y):
         Actor.__init__(self, game, x, y)
         self.groups = game.all_sprites
@@ -51,6 +54,7 @@ class Player(Actor, pygame.sprite.Sprite):
         self.initial_y = y
         self.image.fill(BLUE)
         self.hit_points = 100
+        self.mana_points = 100
         self.attack_power = 10
         self.move_range = 2
         self.turn = 0
@@ -76,6 +80,22 @@ class Player(Actor, pygame.sprite.Sprite):
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
 
+    def draw_spell_area(self):
+        for i in range(3):
+            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                             ((self.initial_x + i) * TILESIZE, self.initial_y * TILESIZE,
+                              TILESIZE, TILESIZE))
+            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                             ((self.initial_x - i) * TILESIZE, self.initial_y * TILESIZE,
+                              TILESIZE, TILESIZE))
+            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                             (self.initial_x * TILESIZE, (self.initial_y + i) * TILESIZE,
+                              TILESIZE, TILESIZE))
+            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                             (self.initial_x * TILESIZE, (self.initial_y - i) * TILESIZE,
+                              TILESIZE, TILESIZE))
+
+
     def take_turn(self, game, event):
         if event.type == pygame.KEYDOWN:
             # player movement
@@ -97,6 +117,10 @@ class Player(Actor, pygame.sprite.Sprite):
                         self.attack(mob)
                         self.turn += 1
                         game.end_player_turn()
+
+            # magic attack push '2'
+            if event.key == pygame.K_2:
+                pass
 
             if event.key == pygame.K_SPACE:
                 self.turn += 1

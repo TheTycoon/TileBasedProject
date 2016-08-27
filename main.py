@@ -35,6 +35,8 @@ class Game:
 
         # load all image and sound files
         self.attack_icon = pygame.image.load(path.join(img_folder, 'sword1.png')).convert_alpha()
+        self.magic_icon = pygame.image.load(path.join(img_folder, 'fireball.png')).convert_alpha()
+
 
         # Load map from text file
         self.map_data = []
@@ -111,7 +113,7 @@ class Game:
         for y in range(0, HEIGHT, TILESIZE):
             pygame.draw.line(self.screen, WHITE, (0, y), (WIDTH, y))
 
-    # Double Check This Function / Make Better
+    # Double Check These Functions / Make Better - Use x & y to draw text position as well
     def draw_health_bar(self, self_screen, x, y, percentage):
         if percentage < 0:
             percentage = 0
@@ -120,25 +122,48 @@ class Game:
         filled = (percentage / 100) * BAR_LENGTH
         outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
         filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
-        pygame.draw.rect(self_screen, GREEN, filled_rect)
+        pygame.draw.rect(self_screen, RED, filled_rect)
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
-        self.draw_text(self.screen, "Health", 12, WIDTH - 130, HEIGHT - 36)
+        self.draw_text(self.screen, "Health", 12, WHITE, WIDTH - 130, HEIGHT - 36)
+
+    def draw_mana_bar(self, self_screen, x, y, percentage):
+        if percentage < 0:
+            percentage = 0
+        BAR_LENGTH = 100
+        BAR_HEIGHT = 10
+        filled = (percentage / 100) * BAR_LENGTH
+        outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+        filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
+        pygame.draw.rect(self_screen, BLUE, filled_rect)
+        pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
+        self.draw_text(self.screen, "Mana", 12, WHITE, WIDTH - 130, HEIGHT - 21)
 
     def draw_ui(self):
         pygame.draw.rect(self.screen, GRAY, (0, HEIGHT - 40, WIDTH, 40))
-        for i in range(8):
-            pygame.draw.rect(self.screen, BLUE, (5 + 37 * i, HEIGHT - 36, 32, 32))
-            self.draw_text(self.screen, str(i + 1), 12, 10 + 37 * i, HEIGHT - 36)
+        for i in range(10):
+            pygame.draw.rect(self.screen, SILVER, (5 + ((5 + TILESIZE) * i), HEIGHT - 36, 32, 32))
+
+
+
         attack_icon = self.attack_icon
         attack_rect = attack_icon.get_rect()
         attack_rect.x = 5
         attack_rect.y = HEIGHT - 36
         self.screen.blit(attack_icon, attack_rect)
 
+        magic_icon = self.magic_icon
+        magic_rect = attack_icon.get_rect()
+        magic_rect.x = 5 + (5 + TILESIZE)
+        magic_rect.y = HEIGHT - 36
+        self.screen.blit(magic_icon, magic_rect)
+
+        for i in range(10):
+            self.draw_text(self.screen, str((i + 1) % 10), 12, BLACK, 10 + ((5 + TILESIZE) * i), HEIGHT - 36)
+
     # function to handle drawing all types text
-    def draw_text(self, surface, text, size, x, y):
+    def draw_text(self, surface, text, size, color, x, y):
         font = pygame.font.Font(FONT, size)
-        text_surface = font.render(text, True, WHITE)
+        text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x, y)  # centers the text
         surface.blit(text_surface, text_rect)
@@ -158,8 +183,9 @@ class Game:
         self.draw_grid()
         self.draw_ui()
         self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.hit_points)
+        self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.mana_points)
 
-
+        self.player.draw_spell_area()
 
         # DISPLAY FRAME = STOP DRAWING
         pygame.display.flip()
@@ -177,6 +203,8 @@ class Game:
 
 game = Game()
 game.show_start_screen()
+
+
 
 while game.running:
     game.new()
