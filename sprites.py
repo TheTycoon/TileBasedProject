@@ -153,8 +153,8 @@ class Enemy(Actor, pygame.sprite.Sprite):
         self.name = 'Red Slime'
         self.level = 1
         self.image = self.game.enemy_icon
-        self.max_hit_points = 20
-        self.current_hit_points = 20
+        self.max_hit_points = 15
+        self.current_hit_points = 15
         self.attack_power = 10
 
 # Mob AI movement needs to be refined still
