@@ -5,13 +5,14 @@ from os import path
 from settings import *
 from sprites import *
 
-from transitions import Machine         # State Machine
+# State Machine
+from transitions.extensions import HierarchicalMachine as Machine
+
 
 
 class Game:
 
-    # Define States for State Machine
-    states = ['player turn', 'enemy turn']
+
 
     def __init__(self):
         # initialize game window, sound interaction, etc
@@ -22,11 +23,23 @@ class Game:
         self.clock = pygame.time.Clock()    # start the clock...
         self.running = True
         self.load_data()
-        self.machine = Machine(model=self, states=self.states, initial='player turn')
+
+        # Define States for State Machine
+        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'inactive']}]
 
         # Add Transitions to State Machine
-        self.machine.add_transition(trigger='end_player_turn', source='player turn', dest='enemy turn')
-        self.machine.add_transition('end_enemy_turn', 'enemy turn', 'player turn')
+        transitions  = [
+            # trigger, source, destination
+            ['end_player_turn', 'player_turn', 'enemy_turn'],
+            ['end_enemy_turn', 'enemy_turn', 'player_turn_moving'],
+            ['player_move', 'player_turn', 'player_turn_moving'],
+            ['player_attack', 'player_turn_moving', 'player_turn_attack'],
+            ['cancel_attack', 'player_turn_attack', 'player_turn_moving']
+
+        ]
+
+        # Initialize State Machine
+        self.machine = Machine(states=states, transitions=transitions, initial='player_turn_moving', ignore_invalid_triggers=True)
 
     def load_data(self):
         # Easy names to start file directories
@@ -36,6 +49,8 @@ class Game:
         # load all image and sound files
         self.attack_icon = pygame.image.load(path.join(img_folder, 'sword1.png')).convert_alpha()
         self.magic_icon = pygame.image.load(path.join(img_folder, 'fireball.png')).convert_alpha()
+        self.enemy_icon = pygame.image.load(path.join(img_folder, 'slime_red.png')).convert_alpha()
+        self.player_icon = pygame.image.load(path.join(img_folder, 'player_image.png')).convert_alpha()
 
 
         # Load map from text file
@@ -90,21 +105,23 @@ class Game:
 
             # ALL KEYDOWN EVENTS HERE
             if event.type == pygame.KEYDOWN:
+                pass
 
                 # quit event / press esc
-                if event.key == pygame.K_ESCAPE:
-                    if self.playing:
-                        self.playing = False
-                    self.running = False
+                #if event.key == pygame.K_ESCAPE:
+                    #if self.playing:
+                        #self.playing = False
+                    #self.running = False
 
             # Take Turns
-            if self.state == 'player turn':
-                self.player.take_turn(game, event)
-            elif self.state == 'enemy turn':
+            if self.machine.state == 'player_turn' or self.machine.state == 'player_turn_moving'\
+                or self.machine.state == 'player_turn_attack':
+                self.player.take_turn(event)
+            elif self.machine.state == 'enemy_turn':
                 for mob in self.mobs:
                     mob.take_turn(game)
-                self.player.start_turn()
-                self.end_enemy_turn()
+                self.player.initialize_turn()
+                self.machine.end_enemy_turn()
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
@@ -119,24 +136,38 @@ class Game:
             percentage = 0
         BAR_LENGTH = 100
         BAR_HEIGHT = 10
-        filled = (percentage / 100) * BAR_LENGTH
+        filled = percentage * BAR_LENGTH
         outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
         filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
         pygame.draw.rect(self_screen, RED, filled_rect)
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
-        self.draw_text(self.screen, "Health", 12, WHITE, WIDTH - 130, HEIGHT - 36)
+        self.draw_text(self.screen, "Health", 12, WHITE, WIDTH - 130, HEIGHT - 36, True)
 
     def draw_mana_bar(self, self_screen, x, y, percentage):
         if percentage < 0:
             percentage = 0
         BAR_LENGTH = 100
         BAR_HEIGHT = 10
-        filled = (percentage / 100) * BAR_LENGTH
+        filled = percentage * BAR_LENGTH
         outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
         filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
         pygame.draw.rect(self_screen, BLUE, filled_rect)
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
-        self.draw_text(self.screen, "Mana", 12, WHITE, WIDTH - 130, HEIGHT - 21)
+        self.draw_text(self.screen, "Mana", 12, WHITE, WIDTH - 130, HEIGHT - 21, True)
+
+    def draw_enemy_info(self):
+        image = self.player.selected_mob.image
+        image_rect = image.get_rect()
+        image_rect.x = WIDTH / 2
+        image_rect.y = HEIGHT - 36
+        self.screen.blit(image, image_rect)
+        self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 12, WHITE, WIDTH / 2 + 50, HEIGHT - 36, False)
+        self.draw_health_bar(self.screen, WIDTH / 2 + 50, HEIGHT - 20, self.player.selected_mob.current_hit_points / self.player.selected_mob.max_hit_points)
+
+
+
+
+
 
     def draw_ui(self):
         pygame.draw.rect(self.screen, GRAY, (0, HEIGHT - 40, WIDTH, 40))
@@ -158,14 +189,17 @@ class Game:
         self.screen.blit(magic_icon, magic_rect)
 
         for i in range(10):
-            self.draw_text(self.screen, str((i + 1) % 10), 12, BLACK, 10 + ((5 + TILESIZE) * i), HEIGHT - 36)
+            self.draw_text(self.screen, str((i + 1) % 10), 12, BLACK, 10 + ((5 + TILESIZE) * i), HEIGHT - 36, True)
 
     # function to handle drawing all types text
-    def draw_text(self, surface, text, size, color, x, y):
+    def draw_text(self, surface, text, size, color, x, y, centered):
         font = pygame.font.Font(FONT, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.midtop = (x, y)  # centers the text
+        text_rect.x = x
+        text_rect.y = y
+        if centered:
+            text_rect.midtop = (x, y)
         surface.blit(text_surface, text_rect)
 
 
@@ -176,16 +210,20 @@ class Game:
         # DRAW EVERYTHING FOR ONE FRAME
         self.screen.fill(BLACK)
 
-        if self.state == 'player turn':
-            self.player.draw_move_area()
+        if self.machine.state == 'player_turn_moving':
+            self.player.draw_filled_area(self.player.move_range)
+        if self.machine.state == 'player_turn_attack':
+            self.player.draw_straight_area(self.player.attack_range)
 
         self.all_sprites.draw(self.screen)
         self.draw_grid()
         self.draw_ui()
-        self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.hit_points)
-        self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.mana_points)
+        self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.current_hit_points / self.player.max_hit_points)
+        self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.current_mana_points / self.player.max_mana_points)
+        if self.machine.state == 'player_turn_attack':
+            pygame.draw.rect(self.screen, ORANGE, self.player.selected_mob.rect, 3)
+            self.draw_enemy_info()
 
-        self.player.draw_spell_area()
 
         # DISPLAY FRAME = STOP DRAWING
         pygame.display.flip()
