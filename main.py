@@ -1,19 +1,12 @@
-import pygame
 from pygame.locals import *
 from os import path
 
-from settings import *
-from sprites import *
+from player import *
 
-# State Machine
 from transitions.extensions import HierarchicalMachine as Machine
 
 
-
 class Game:
-
-
-
     def __init__(self):
         # initialize game window, sound interaction, etc
         pygame.init()
@@ -27,7 +20,7 @@ class Game:
         # Define States for State Machine
         states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'inactive']}]
 
-        # Add Transitions to State Machine
+        # Add Transitions for State Machine
         transitions  = [
             # trigger, source, destination
             ['end_player_turn', 'player_turn', 'enemy_turn'],
@@ -35,7 +28,6 @@ class Game:
             ['player_move', 'player_turn', 'player_turn_moving'],
             ['player_attack', 'player_turn_moving', 'player_turn_attack'],
             ['cancel_attack', 'player_turn_attack', 'player_turn_moving']
-
         ]
 
         # Initialize State Machine
@@ -59,8 +51,6 @@ class Game:
             for line in file:
                 self.map_data.append(line)
 
-
-
     def new(self):
         # start a new game
 
@@ -69,13 +59,13 @@ class Game:
         self.mobs = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
 
-        # Iterate through the map.txt file to initialize the player and starting walls
+        # Iterate through the map.txt file to initialize the player and starting enemies/walls
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == 'P':
                     self.player = Player(self, col, row)
                 if tile == 'E':
-                    self.enemy = Enemy(self, col, row)
+                    Enemy(self, col, row)
                 if tile == '1':
                     Wall(self, col, row)
 
@@ -107,19 +97,14 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 pass
 
-                # quit event / press esc
-                #if event.key == pygame.K_ESCAPE:
-                    #if self.playing:
-                        #self.playing = False
-                    #self.running = False
-
             # Take Turns
             if self.machine.state == 'player_turn' or self.machine.state == 'player_turn_moving'\
                 or self.machine.state == 'player_turn_attack':
                 self.player.take_turn(event)
+
             elif self.machine.state == 'enemy_turn':
                 for mob in self.mobs:
-                    mob.take_turn(game)
+                    mob.take_turn()
                 self.player.initialize_turn()
                 self.machine.end_enemy_turn()
 
@@ -164,17 +149,10 @@ class Game:
         self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 12, WHITE, WIDTH / 2 + 50, HEIGHT - 36, False)
         self.draw_health_bar(self.screen, WIDTH / 2 + 50, HEIGHT - 20, self.player.selected_mob.current_hit_points / self.player.selected_mob.max_hit_points)
 
-
-
-
-
-
     def draw_ui(self):
         pygame.draw.rect(self.screen, GRAY, (0, HEIGHT - 40, WIDTH, 40))
         for i in range(10):
             pygame.draw.rect(self.screen, SILVER, (5 + ((5 + TILESIZE) * i), HEIGHT - 36, 32, 32))
-
-
 
         attack_icon = self.attack_icon
         attack_rect = attack_icon.get_rect()
@@ -202,7 +180,6 @@ class Game:
             text_rect.midtop = (x, y)
         surface.blit(text_surface, text_rect)
 
-
     def draw(self):
         # SHOW FPS IN TITLE BAR WHILE TESTING
         pygame.display.set_caption("{:.2f}".format(self.clock.get_fps()))
@@ -220,10 +197,10 @@ class Game:
         self.draw_ui()
         self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.current_hit_points / self.player.max_hit_points)
         self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.current_mana_points / self.player.max_mana_points)
+
         if self.machine.state == 'player_turn_attack':
             pygame.draw.rect(self.screen, ORANGE, self.player.selected_mob.rect, 3)
             self.draw_enemy_info()
-
 
         # DISPLAY FRAME = STOP DRAWING
         pygame.display.flip()
@@ -236,13 +213,8 @@ class Game:
         # Game Over Screen
         pass
 
-
-
-
 game = Game()
 game.show_start_screen()
-
-
 
 while game.running:
     game.new()

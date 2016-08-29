@@ -1,4 +1,5 @@
 import pygame
+
 # Game Options and Settings
 
 # define colors
@@ -20,8 +21,9 @@ SILVER = (192, 192, 192)
 # game settings
 WIDTH = 1024
 HEIGHT = 704
+TILESIZE = 32
 FPS = 60
 TITLE = 'Tile-based Project'
+
 # loads a font from the computer that most closely matches the name given
 FONT = pygame.font.match_font('arial')
-TILESIZE = 32
