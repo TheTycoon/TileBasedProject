@@ -18,7 +18,7 @@ class Game:
         self.load_data()
 
         # Define States for State Machine
-        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'inactive']}]
+        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'magic']}]
 
         # Add Transitions for State Machine
         transitions  = [
@@ -27,7 +27,9 @@ class Game:
             ['end_enemy_turn', 'enemy_turn', 'player_turn_moving'],
             ['player_move', 'player_turn', 'player_turn_moving'],
             ['player_attack', 'player_turn_moving', 'player_turn_attack'],
-            ['cancel_attack', 'player_turn_attack', 'player_turn_moving']
+            ['cancel_attack', 'player_turn_attack', 'player_turn_moving'],
+            ['player_magic', 'player_turn_moving' ,'player_turn_magic'],
+            ['cancel_magic', 'player_turn_magic', 'player_turn_moving']
         ]
 
         # Initialize State Machine
@@ -99,7 +101,7 @@ class Game:
 
             # Take Turns
             if self.machine.state == 'player_turn' or self.machine.state == 'player_turn_moving'\
-                or self.machine.state == 'player_turn_attack':
+                or self.machine.state == 'player_turn_attack' or self.machine.state == 'player_turn_magic':
                 self.player.take_turn(event)
 
             elif self.machine.state == 'enemy_turn':
@@ -188,9 +190,11 @@ class Game:
         self.screen.fill(BLACK)
 
         if self.machine.state == 'player_turn_moving':
-            self.player.draw_filled_area(self.player.move_range)
+            self.player.draw_move_area()
         if self.machine.state == 'player_turn_attack':
-            self.player.draw_straight_area(self.player.attack_range)
+            self.player.draw_range_area(self.player.attack_range, 'straight')
+        if self.machine.state == 'player_turn_magic':
+            self.player.draw_range_area(self.player.spell_range, 'filled')
 
         self.all_sprites.draw(self.screen)
         self.draw_grid()
@@ -198,7 +202,7 @@ class Game:
         self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.current_hit_points / self.player.max_hit_points)
         self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.current_mana_points / self.player.max_mana_points)
 
-        if self.machine.state == 'player_turn_attack':
+        if self.machine.state == 'player_turn_attack' or self.machine.state == 'player_turn_magic':
             pygame.draw.rect(self.screen, ORANGE, self.player.selected_mob.rect, 3)
             self.draw_enemy_info()
 

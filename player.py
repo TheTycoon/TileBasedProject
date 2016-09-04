@@ -14,18 +14,20 @@ class Player(Actor, pygame.sprite.Sprite):
         self.max_mana_points = 100
         self.current_mana_points = 100
         self.attack_power = 10
+        self.magic_power = 5
         self.move_range = 2
         self.attack_range = 1
+        self.spell_range = 2
         self.turn = 0
 
     def initialize_turn(self):
         self.initial_x = self.x
         self.initial_y = self.y
 
-    def draw_filled_area(self, value):
-        for i in range(0, value + 1):
-            for j in range(0, value + 1):
-                if i + j <= value:
+    def draw_move_area(self):
+        for i in range(0, self.move_range + 1):
+            for j in range(0, self.move_range + 1):
+                if i + j <= self.move_range:
                     pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
@@ -39,20 +41,37 @@ class Player(Actor, pygame.sprite.Sprite):
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
 
-    def draw_straight_area(self, value):
-        for i in range(value + 1):
-            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
-                             ((self.x + i) * TILESIZE, self.y * TILESIZE,
-                              TILESIZE, TILESIZE))
-            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
-                             ((self.x - i) * TILESIZE, self.y * TILESIZE,
-                              TILESIZE, TILESIZE))
-            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
-                             (self.x * TILESIZE, (self.y + i) * TILESIZE,
-                              TILESIZE, TILESIZE))
-            pygame.draw.rect(self.game.screen, LIGHT_BLUE,
-                             (self.x * TILESIZE, (self.y - i) * TILESIZE,
-                              TILESIZE, TILESIZE))
+    def draw_range_area(self, value, type):
+        if type == 'straight':
+            for i in range(value + 1):
+                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                 ((self.x + i) * TILESIZE, self.y * TILESIZE,
+                                  TILESIZE, TILESIZE))
+                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                 ((self.x - i) * TILESIZE, self.y * TILESIZE,
+                                  TILESIZE, TILESIZE))
+                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                 (self.x * TILESIZE, (self.y + i) * TILESIZE,
+                                  TILESIZE, TILESIZE))
+                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                 (self.x * TILESIZE, (self.y - i) * TILESIZE,
+                                  TILESIZE, TILESIZE))
+        if type == 'filled':
+            for i in range(0, value + 1):
+                for j in range(0, value + 1):
+                    if i + j <= value:
+                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                         ((self.x + i) * TILESIZE, (self.y + j) * TILESIZE,
+                                          TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                         ((self.x + i) * TILESIZE, (self.y - j) * TILESIZE,
+                                          TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                         ((self.x - i) * TILESIZE, (self.y + j) * TILESIZE,
+                                          TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                                         ((self.x - i) * TILESIZE, (self.y - j) * TILESIZE,
+                                          TILESIZE, TILESIZE))
 
     def take_turn(self, event):
         if self.game.machine.state == 'player_turn_moving':
@@ -77,6 +96,15 @@ class Player(Actor, pygame.sprite.Sprite):
                         self.selected_mob = self.targets[0]
                         self.game.machine.player_attack()
 
+                if event.key == pygame.K_2:
+                    self.targets = []
+                    for mob in self.game.mobs:
+                        if (abs(self.x - mob.x)  + abs(self.y - mob.y) <= self.spell_range):
+                            self.targets.append(mob)
+                    if self.targets:
+                        self.selected_mob = self.targets[0]
+                        self.game.machine.player_magic()
+
                 if event.key == pygame.K_SPACE:
                     self.turn += 1
                     self.game.machine.end_player_turn()
@@ -92,4 +120,17 @@ class Player(Actor, pygame.sprite.Sprite):
 
                 if event.key == pygame.K_RETURN:
                     self.attack(self.selected_mob)
+                    self.game.machine.end_player_turn()
+
+        if self.game.machine.state == 'player_turn_magic':
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    self.selected_mob = self.targets[(self.targets.index(self.selected_mob) + 1) % len(self.targets)]
+
+                if event.key == pygame.K_ESCAPE:
+                    self.game.machine.cancel_magic()
+
+                if event.key == pygame.K_RETURN:
+                    self.magic_attack(self.selected_mob)
                     self.game.machine.end_player_turn()

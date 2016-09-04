@@ -17,6 +17,15 @@ class Actor:
         if target.current_hit_points <= 0:
             target.kill()
 
+    def magic_attack(self, target):
+        target.current_hit_points -= self.magic_power
+        if target.current_hit_points <= 0:
+            target.kill()
+        self.current_mana_points -= 20
+        if self.current_mana_points < 0:
+            self.current_mana_points = 0
+
+
     def collide_with_walls(self, dx=0, dy=0):
         for wall in self.game.walls:
             if wall.x == self.x + dx and wall.y == self.y + dy:
