@@ -33,7 +33,8 @@ class Game:
         ]
 
         # Initialize State Machine
-        self.machine = Machine(states=states, transitions=transitions, initial='player_turn_moving', ignore_invalid_triggers=True)
+        self.machine = Machine(states=states, transitions=transitions,
+                               initial='player_turn_moving', ignore_invalid_triggers=True)
 
     def load_data(self):
         # Easy names to start file directories
@@ -189,19 +190,23 @@ class Game:
         # DRAW EVERYTHING FOR ONE FRAME
         self.screen.fill(BLACK)
 
+        # Draw highlighted area depending on what action is happening
         if self.machine.state == 'player_turn_moving':
             self.player.draw_move_area()
         if self.machine.state == 'player_turn_attack':
-            self.player.draw_range_area(self.player.attack_range, 'straight')
+            self.player.draw_range_area(self.player.attack_range, 'straight', RED)
         if self.machine.state == 'player_turn_magic':
-            self.player.draw_range_area(self.player.spell_range, 'filled')
+            self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
 
         self.all_sprites.draw(self.screen)
         self.draw_grid()
         self.draw_ui()
-        self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35, self.player.current_hit_points / self.player.max_hit_points)
-        self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20, self.player.current_mana_points / self.player.max_mana_points)
+        self.draw_health_bar(self.screen, WIDTH - 105, HEIGHT - 35,
+                             self.player.current_hit_points / self.player.max_hit_points)
+        self.draw_mana_bar(self.screen, WIDTH - 105, HEIGHT - 20,
+                           self.player.current_mana_points / self.player.max_mana_points)
 
+        # Draw a box to highlight the selected enemy and show enemy info in action bar
         if self.machine.state == 'player_turn_attack' or self.machine.state == 'player_turn_magic':
             pygame.draw.rect(self.screen, ORANGE, self.player.selected_mob.rect, 3)
             self.draw_enemy_info()

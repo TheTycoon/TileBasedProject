@@ -41,35 +41,36 @@ class Player(Actor, pygame.sprite.Sprite):
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
 
-    def draw_range_area(self, value, type):
+    def draw_range_area(self, value, type, color):
+
         if type == 'straight':
             for i in range(value + 1):
-                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                pygame.draw.rect(self.game.screen, color,
                                  ((self.x + i) * TILESIZE, self.y * TILESIZE,
                                   TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                pygame.draw.rect(self.game.screen, color,
                                  ((self.x - i) * TILESIZE, self.y * TILESIZE,
                                   TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                pygame.draw.rect(self.game.screen, color,
                                  (self.x * TILESIZE, (self.y + i) * TILESIZE,
                                   TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                pygame.draw.rect(self.game.screen, color,
                                  (self.x * TILESIZE, (self.y - i) * TILESIZE,
                                   TILESIZE, TILESIZE))
         if type == 'filled':
             for i in range(0, value + 1):
                 for j in range(0, value + 1):
                     if i + j <= value:
-                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                        pygame.draw.rect(self.game.screen, color,
                                          ((self.x + i) * TILESIZE, (self.y + j) * TILESIZE,
                                           TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                        pygame.draw.rect(self.game.screen, color,
                                          ((self.x + i) * TILESIZE, (self.y - j) * TILESIZE,
                                           TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                        pygame.draw.rect(self.game.screen, color,
                                          ((self.x - i) * TILESIZE, (self.y + j) * TILESIZE,
                                           TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, LIGHT_BLUE,
+                        pygame.draw.rect(self.game.screen, color,
                                          ((self.x - i) * TILESIZE, (self.y - j) * TILESIZE,
                                           TILESIZE, TILESIZE))
 
@@ -120,6 +121,7 @@ class Player(Actor, pygame.sprite.Sprite):
 
                 if event.key == pygame.K_RETURN:
                     self.attack(self.selected_mob)
+                    self.turn += 1
                     self.game.machine.end_player_turn()
 
         if self.game.machine.state == 'player_turn_magic':
@@ -133,4 +135,5 @@ class Player(Actor, pygame.sprite.Sprite):
 
                 if event.key == pygame.K_RETURN:
                     self.magic_attack(self.selected_mob)
+                    self.turn += 1
                     self.game.machine.end_player_turn()
