@@ -220,18 +220,44 @@ class Game:
         pygame.display.flip()
 
     def show_start_screen(self):
-        # Start Screen / Menu
-        pass
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+
+            # Draw All Text To Screen
+            self.draw_text(self.screen, TITLE, 50, WHITE, WIDTH / 2, HEIGHT / 4, True)
+            self.draw_text(self.screen, "Choose a Class", 30, WHITE, WIDTH / 2, HEIGHT / 2, True)
+            self.draw_text(self.screen, "1. Warrior", 20, WHITE, 3 * WIDTH / 8, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, "2. Archer", 20, WHITE, WIDTH / 2, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, "3. Mage", 20, WHITE, 5 * WIDTH / 8, 3 * HEIGHT / 4, True)
+            pygame.display.flip()
+
+            # Get Events / Player Chooses Their Class
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == K_1:
+                        waiting = False
+                    if event.key == K_2:
+                        waiting = False
+                    if event.key == K_3:
+                        waiting = False
+                    if event.key == K_ESCAPE:
+                        waiting = False
+                        self.running = False
+
 
     def show_end_screen(self):
         # Game Over Screen
         pass
 
 game = Game()
-game.show_start_screen()
+game.new()
 
 while game.running:
-    game.new()
+    game.show_start_screen()
     game.run()
 
     game.show_end_screen()
