@@ -18,7 +18,8 @@ class Game:
         self.load_data()
 
         # Define States for State Machine
-        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'magic']}]
+        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'magic']},
+                  'character_menu']
 
         # Add Transitions for State Machine
         transitions  = [
@@ -29,7 +30,9 @@ class Game:
             ['player_attack', 'player_turn_moving', 'player_turn_attack'],
             ['cancel_attack', 'player_turn_attack', 'player_turn_moving'],
             ['player_magic', 'player_turn_moving' ,'player_turn_magic'],
-            ['cancel_magic', 'player_turn_magic', 'player_turn_moving']
+            ['cancel_magic', 'player_turn_magic', 'player_turn_moving'],
+            ['open_character_menu', 'player_turn_moving', 'character_menu'],
+            ['cancel_menu', 'character_menu', 'player_turn_moving']
         ]
 
         # Initialize State Machine
@@ -101,8 +104,7 @@ class Game:
                 pass
 
             # Take Turns
-            if self.machine.state == 'player_turn' or self.machine.state == 'player_turn_moving'\
-                or self.machine.state == 'player_turn_attack' or self.machine.state == 'player_turn_magic':
+            if self.machine.state[:11] == 'player_turn':
                 self.player.take_turn(event)
 
             elif self.machine.state == 'enemy_turn':
@@ -135,9 +137,9 @@ class Game:
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
 
         if type == 'health':
-            self.draw_text(self.screen, "Health", 12, WHITE, WIDTH - 130, HEIGHT - 36, True)
+            self.draw_text(self.screen, "Health", 14, WHITE, WIDTH - 135, HEIGHT - 38, True)
         if type == 'mana':
-            self.draw_text(self.screen, "Mana", 12, WHITE, WIDTH - 130, HEIGHT - 21, True)
+            self.draw_text(self.screen, "Mana", 14, WHITE, WIDTH - 135, HEIGHT - 23, True)
 
     def draw_enemy_info(self):
         image = self.player.selected_mob.image
@@ -145,7 +147,7 @@ class Game:
         image_rect.x = WIDTH / 2
         image_rect.y = HEIGHT - 36
         self.screen.blit(image, image_rect)
-        self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 12, WHITE, WIDTH / 2 + 50, HEIGHT - 36, False)
+        self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 14, WHITE, WIDTH / 2 + 50, HEIGHT - 36, False)
         self.draw_bar(self.screen, WIDTH / 2 + 50, HEIGHT - 20,
                       self.player.selected_mob.current_hit_points / self.player.selected_mob.max_hit_points, 'health')
 
@@ -201,18 +203,22 @@ class Game:
         # DRAW EVERYTHING FOR ONE FRAME
         self.screen.fill(BLACK)
 
-        # Draw highlighted area depending on what action is happening
-        if self.machine.state == 'player_turn_moving':
-            self.player.draw_move_area()
-        if self.machine.state == 'player_turn_attack':
-            self.player.draw_range_area(self.player.attack_range, 'straight', RED)
-        if self.machine.state == 'player_turn_magic':
-            self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
+        # Draw the correct state (Basically the world or a menu)
+        if self.machine.state == 'character_menu':
+            self.player.character_info()
+        else:
+            # Draw highlighted area depending on what action is happening
+            if self.machine.state == 'player_turn_moving':
+                self.player.draw_move_area()
+            if self.machine.state == 'player_turn_attack':
+                self.player.draw_range_area(self.player.attack_range, 'straight', RED)
+            if self.machine.state == 'player_turn_magic':
+                self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
 
-        # Draw all sprites, the grid, and the UI
-        self.all_sprites.draw(self.screen)
-        self.draw_grid()
-        self.draw_ui()
+            # Draw all sprites, the grid, and the UI
+            self.all_sprites.draw(self.screen)
+            self.draw_grid()
+            self.draw_ui()
 
 
 
@@ -225,25 +231,25 @@ class Game:
             self.clock.tick(FPS)
 
             # Draw All Text To Screen
-            self.draw_text(self.screen, TITLE, 50, WHITE, WIDTH / 2, HEIGHT / 4, True)
-            self.draw_text(self.screen, "Choose a Class", 30, WHITE, WIDTH / 2, HEIGHT / 2, True)
-            self.draw_text(self.screen, "1. Warrior", 20, WHITE, 3 * WIDTH / 8, 3 * HEIGHT / 4, True)
-            self.draw_text(self.screen, "2. Archer", 20, WHITE, WIDTH / 2, 3 * HEIGHT / 4, True)
-            self.draw_text(self.screen, "3. Mage", 20, WHITE, 5 * WIDTH / 8, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, TITLE, 64, WHITE, WIDTH / 2, HEIGHT / 4, True)
+            self.draw_text(self.screen, "Choose a Class", 40, WHITE, WIDTH / 2, HEIGHT / 2, True)
+            self.draw_text(self.screen, "1. Warrior", 28, WHITE, WIDTH / 8, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, "2. Archer", 28, WHITE, WIDTH / 2, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, "3. Mage", 28, WHITE, 7 * WIDTH / 8, 3 * HEIGHT / 4, True)
             pygame.display.flip()
 
             # Get Events / Player Chooses Their Class
             for event in pygame.event.get():
+                # Quit if player exits game
                 if event.type == pygame.QUIT:
                     waiting = False
                     self.running = False
+                # All keydown events
                 if event.type == pygame.KEYDOWN:
-                    if event.key == K_1:
+                    if event.key == K_1 or event.key == K_2 or event.key == K_3:
+                        self.player.assign_class(event)
                         waiting = False
-                    if event.key == K_2:
-                        waiting = False
-                    if event.key == K_3:
-                        waiting = False
+
                     if event.key == K_ESCAPE:
                         waiting = False
                         self.running = False

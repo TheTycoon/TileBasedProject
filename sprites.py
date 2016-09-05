@@ -13,12 +13,12 @@ class Actor:
         self.y = y
 
     def attack(self, target):
-        target.current_hit_points -= self.attack_power
+        target.current_hit_points -= self.melee_attack_power
         if target.current_hit_points <= 0:
             target.kill()
 
     def magic_attack(self, target):
-        target.current_hit_points -= self.magic_power
+        target.current_hit_points -= self.magic_attack_power
         if target.current_hit_points <= 0:
             target.kill()
         self.current_mana_points -= 20
@@ -59,9 +59,9 @@ class Enemy(Actor, pygame.sprite.Sprite):
         self.name = 'Red Slime'
         self.level = 1
         self.image = self.game.enemy_icon
-        self.max_hit_points = 15
-        self.current_hit_points = 15
-        self.attack_power = 10
+        self.max_hit_points = 5
+        self.current_hit_points = 5
+        self.melee_attack_power = 1
 
 # Mob AI movement needs to be refined still
     def take_turn(self):
