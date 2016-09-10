@@ -13,18 +13,26 @@ class Actor:
         self.y = y
 
     def attack(self, target):
-        target.current_hit_points -= self.melee_attack_power
+        if random.randint(0, 99) <= target.dodge_percent:
+            damage = 0
+            print("Dodged!")
+        else:
+            damage = self.melee_attack_power - target.melee_defense
+            if damage <= 0:
+                damage = 1
+        target.current_hit_points -= damage
+
         if target.current_hit_points <= 0:
             target.kill()
+            self.experience += target.experience_worth
 
     def magic_attack(self, target):
+        self.current_mana_points -= 5
+
         target.current_hit_points -= self.magic_attack_power
         if target.current_hit_points <= 0:
             target.kill()
-        self.current_mana_points -= 20
-        if self.current_mana_points < 0:
-            self.current_mana_points = 0
-
+            self.experience += target.experience_worth
 
     def collide_with_walls(self, dx=0, dy=0):
         for wall in self.game.walls:
@@ -60,8 +68,13 @@ class Enemy(Actor, pygame.sprite.Sprite):
         self.level = 1
         self.image = self.game.enemy_icon
         self.max_hit_points = 5
-        self.current_hit_points = 5
+        self.current_hit_points = self.max_hit_points
         self.melee_attack_power = 1
+        self.melee_defense = 1
+        self.ranged_defense = 0
+        self.magic_defense = 0
+        self.dodge_percent = 0
+        self.experience_worth = 10
 
 # Mob AI movement needs to be refined still
     def take_turn(self):
@@ -88,7 +101,6 @@ class Wall(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
         pygame.sprite.Sprite.__init__(self, self.groups)
-        game = game
         self.image = pygame.Surface((TILESIZE, TILESIZE))
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()

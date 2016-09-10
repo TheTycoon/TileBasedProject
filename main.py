@@ -18,8 +18,11 @@ class Game:
         self.load_data()
 
         # Define States for State Machine
-        states = ['enemy_turn', {'name': 'player_turn', 'children': ['moving', 'attack', 'magic']},
-                  'character_menu']
+        states = [
+            {'name': 'player_turn', 'children': ['moving', 'attack', 'magic']},
+            {'name': 'menu', 'children': ['character', 'inventory']},
+            'enemy_turn'
+        ]
 
         # Add Transitions for State Machine
         transitions  = [
@@ -31,8 +34,10 @@ class Game:
             ['cancel_attack', 'player_turn_attack', 'player_turn_moving'],
             ['player_magic', 'player_turn_moving' ,'player_turn_magic'],
             ['cancel_magic', 'player_turn_magic', 'player_turn_moving'],
-            ['open_character_menu', 'player_turn_moving', 'character_menu'],
-            ['cancel_menu', 'character_menu', 'player_turn_moving']
+            ['open_character_menu', 'player_turn_moving', 'menu_character'],
+            ['cancel_menu', 'menu_character', 'player_turn_moving'],
+            ['open_inventory_menu', 'player_turn_moving', 'menu_inventory'],
+            ['cancel_menu', 'menu_inventory', 'player_turn_moving']
         ]
 
         # Initialize State Machine
@@ -204,8 +209,10 @@ class Game:
         self.screen.fill(BLACK)
 
         # Draw the correct state (Basically the world or a menu)
-        if self.machine.state == 'character_menu':
-            self.player.character_info()
+        if self.machine.state == 'menu_character':
+            self.player.draw_character_info()
+        elif self.machine.state == 'menu_inventory':
+            self.player.draw_inventory()
         else:
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
@@ -261,11 +268,10 @@ class Game:
 
 game = Game()
 game.new()
+game.show_start_screen()
 
 while game.running:
-    game.show_start_screen()
     game.run()
-
     game.show_end_screen()
 
 pygame.quit()

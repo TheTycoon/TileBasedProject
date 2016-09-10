@@ -12,11 +12,27 @@ class Player(Actor, pygame.sprite.Sprite):
         self.move_range = 1
         self.attack_range = 1
         self.spell_range = 2
+        self.spell_cost = 5
         self.turn = 0
+
+        # inventory stuff
+        self.melee_weapon = "Empty"
+        self.shield = "Empty"
+        self.ranged_weapon = "Empty"
+        self.ammo_type = "None"
+        self.ammo_amount = 0
+        self.helmet = "Empty"
+        self.gloves = "Empty"
+        self.chest = "Empty"
+        self.legs = "Empty"
+        self.boots = "Empty"
+        self.amulet = "Empty"
+        self.ring = "Empty"
 
     def assign_class(self, event):
         if event.key == pygame.K_1:
             self.character_class = "Warrior"
+            self.equipped_weapon = 'Dagger'
             self.strength     = 4
             self.dexterity    = 2
             self.intelligence = 2
@@ -25,6 +41,7 @@ class Player(Actor, pygame.sprite.Sprite):
             self.wisdom       = 1
         if event.key == pygame.K_2:
             self.character_class = "Archer"
+            self.equipped_weapon = 'Bow'
             self.strength     = 2
             self.dexterity    = 4
             self.intelligence = 2
@@ -33,28 +50,37 @@ class Player(Actor, pygame.sprite.Sprite):
             self.wisdom       = 2
         if event.key == pygame.K_3:
             self.character_class = "Mage"
-            self.strength     = 2
+            self.equipped_weapon = 'Staff'
+            self.strength     = 1
             self.dexterity    = 2
             self.intelligence = 4
             self.agility      = 2
             self.endurance    = 2
-            self.wisdom       = 3
+            self.wisdom       = 4
+
+        # Set All Other Equippable Slots to None Besides Starting Weapon
+        self.equipped_armor  = 'None'
+        self.equipped_helmet = 'None'
+        self.equipped_boots  = 'None'
+        # etc...
 
         # All of the starting derived values based on stats
         self.max_hit_points = 5 + self.endurance * 3
         self.current_hit_points = self.max_hit_points
         self.max_mana_points = self.wisdom * 5
         self.current_mana_points = self.max_mana_points
-        self.melee_attack_power = self.strength
-        self.range_attack_power = self.dexterity
-        self.magic_attack_power = self.intelligence
-        self.melee_defense = self.strength + self.endurance
-        self.range_defense = self.dexterity + self.agility
-        self.magic_defense = self.intelligence + self.wisdom
+        self.melee_attack_power = self.strength + int(0.5 * (self.dexterity + self.agility))
+        self.range_attack_power = self.dexterity + int(0.5 * (self.strength + self.agility))
+        self.magic_attack_power = self.intelligence + int(0.5 * (self.wisdom + self.endurance))
+        self.melee_defense = int(0.5 * (self.strength + self.endurance))
+        self.range_defense = int(0.5 * (self.dexterity + self.agility))
+        self.magic_defense = int(0.5 * (self.intelligence + self.wisdom))
         self.dodge_percent = self.agility
         self.level = 1
+        self.experience = 0
+        self.next_level = 100
 
-    def character_info(self):
+    def draw_character_info(self):
         waiting = True
         while waiting:
             self.game.clock.tick(FPS)
@@ -63,49 +89,112 @@ class Player(Actor, pygame.sprite.Sprite):
             self.game.screen.fill(BLACK)
 
             # Draw Info
-            self.game.draw_text(self.game.screen, "Class: " + self.character_class, 32,
-                                WHITE, 10, HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Level: " + str(self.level), 32,
-                                WHITE, 10, 2 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "STR: " + str(self.strength), 32,
-                                WHITE, 10, 4 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "DEX: " + str(self.dexterity), 32,
-                                WHITE, 10, 5 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "INT: " + str(self.intelligence), 32,
-                                WHITE, 10, 6 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "AGI: " + str(self.agility), 32,
-                                WHITE, 10, 7 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "END: " + str(self.endurance), 32,
-                                WHITE, 10, 8 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "WIS: " + str(self.wisdom), 32,
-                                WHITE, 10, 9 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, self.character_class, 32,
+                                LIGHT_BLUE, 10, HEIGHT / 16, False)
 
-            self.game.draw_text(self.game.screen, "Derived Statistics", 32, WHITE, WIDTH / 2, HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Level: " + str(self.level), 32,
+                                WHITE, 10, 3 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Experience: " + str(self.experience), 32,
+                                WHITE, 10, 4 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Next Level: " + str(self.next_level), 32,
+                                WHITE, 10, 5 * HEIGHT / 16, False)
+
+            self.game.draw_text(self.game.screen, "Basic Attributes", 32,
+                                LIGHT_BLUE, 10, 7 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Strength    : " + str(self.strength), 32,
+                                WHITE, 10, 8 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Endurance   : " + str(self.endurance), 32,
+                                WHITE, 10, 9 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Dexterity   : " + str(self.dexterity), 32,
+                                WHITE, 10, 10 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Agility     : " + str(self.agility), 32,
+                                WHITE, 10, 11 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Intelligence: " + str(self.intelligence), 32,
+                                WHITE, 10, 12 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Wisdom      : " + str(self.wisdom), 32,
+                                WHITE, 10, 13 * HEIGHT / 16, False)
+
+            pygame.draw.line(self.game.screen, WHITE, (WIDTH / 2 - 5, 0), (WIDTH / 2 - 5, HEIGHT), 5)
+
+            self.game.draw_text(self.game.screen, "Derived Attributes", 32, LIGHT_BLUE, WIDTH / 2 + 10, HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "HP  : " + str(self.current_hit_points) + "/" + str(self.max_hit_points),
-                                32, WHITE, WIDTH / 2, 3 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 3 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "MP  : " + str(self.current_mana_points) + "/" + str(self.max_mana_points),
-                                32, WHITE, WIDTH / 2, 4 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 4 * HEIGHT / 16, False)
 
             self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power),
-                                32, WHITE, WIDTH / 2, 5 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Melee Defense : " + str(self.melee_defense),
-                                32, WHITE, WIDTH / 2, 6 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 6 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Attack : " + str(self.range_attack_power),
-                                32, WHITE, WIDTH / 2, 7 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Ranged Defense: " + str(self.range_defense),
-                                32, WHITE, WIDTH / 2, 8 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 7 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Magic Attack  : " + str(self.magic_attack_power),
-                                32, WHITE, WIDTH / 2, 9 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 8 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Melee Defense : " + str(self.melee_defense),
+                                32, WHITE, WIDTH / 2 + 10, 9 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Ranged Defense: " + str(self.range_defense),
+                                32, WHITE, WIDTH / 2 + 10, 10 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Magic Defense : " + str(self.magic_defense),
-                                32, WHITE, WIDTH / 2, 10 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Dodge Ability : " + str(self.agility) + "%",
-                                32, WHITE, WIDTH / 2, 11 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 11 * HEIGHT / 16, False)
+
+            self.game.draw_text(self.game.screen, "Dodge Chance  : " + str(self.agility) + "%",
+                                32, WHITE, WIDTH / 2 + 10, 13 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Move Range    : " + str(self.move_range),
-                                32, WHITE, WIDTH / 2, 12 * HEIGHT / 16, False)
+                                32, WHITE, WIDTH / 2 + 10, 14 * HEIGHT / 16, False)
 
             # End Drawing Frame
             pygame.display.flip()
 
+
+            # Get Events
+            for event in pygame.event.get():
+                # Quit if player exits game
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    self.running = False
+
+                # All keydown events
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_ESCAPE:
+                        waiting = False
+                        self.game.machine.cancel_menu()
+
+    def draw_inventory(self):
+        waiting = True
+        while waiting:
+            self.game.clock.tick(FPS)
+
+            # Start Drawing Frame
+            self.game.screen.fill(BLACK)
+
+            self.game.draw_text(self.game.screen, "Inventory", 32,
+                                LIGHT_BLUE, 10, HEIGHT / 16, False)
+            # WEAPONS
+            self.game.draw_text(self.game.screen, "Melee Weapon : " + self.melee_weapon, 32,
+                                WHITE, 10, 3 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Shield       : " + self.shield, 32,
+                                WHITE, 10, 4 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Ranged Weapon: " + self.ranged_weapon, 32,
+                                WHITE, 10, 5 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Ammo         : " + str(self.ammo_amount) + " x " + self.ammo_type, 32,
+                                WHITE, 10, 6 * HEIGHT / 16, False)
+            # ARMOR
+            self.game.draw_text(self.game.screen, "Helmet       : " + self.helmet, 32,
+                                WHITE, 10, 8 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Gloves       : " + self.gloves, 32,
+                                WHITE, 10, 9 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Chest        : " + self.chest, 32,
+                                WHITE, 10, 10 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Legs         : " + self.legs, 32,
+                                WHITE, 10, 11 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Boots        : " + self.boots, 32,
+                                WHITE, 10, 12 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Amulet       : " + self.amulet, 32,
+                                WHITE, 10, 14 * HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Ring         : " + self.ring, 32,
+                                WHITE, 10, 15 * HEIGHT / 16, False)
+
+            # End Drawing Frame
+            pygame.display.flip()
 
             # Get Events
             for event in pygame.event.get():
@@ -198,7 +287,7 @@ class Player(Actor, pygame.sprite.Sprite):
                         self.selected_mob = self.targets[0]
                         self.game.machine.player_attack()
 
-                if event.key == pygame.K_2:
+                if event.key == pygame.K_2 and self.current_mana_points >= self.spell_cost:
                     self.targets = []
                     for mob in self.game.mobs:
                         if (abs(self.x - mob.x)  + abs(self.y - mob.y) <= self.spell_range):
@@ -213,6 +302,9 @@ class Player(Actor, pygame.sprite.Sprite):
 
                 if event.key == pygame.K_c:
                     self.game.machine.open_character_menu()
+
+                if event.key == pygame.K_i:
+                    self.game.machine.open_inventory_menu()
 
         if self.game.machine.state == 'player_turn_attack':
             if event.type == pygame.KEYDOWN:
