@@ -1,4 +1,6 @@
 from sprites import *
+from weapons import *
+from armors import *
 
 
 class Player(Actor, pygame.sprite.Sprite):
@@ -16,53 +18,58 @@ class Player(Actor, pygame.sprite.Sprite):
         self.turn = 0
 
         # inventory stuff
-        self.melee_weapon = "Empty"
-        self.shield = "Empty"
-        self.ranged_weapon = "Empty"
-        self.ammo_type = "None"
+        self.melee_weapon = MELEE['none']
+        self.shield = ARMOR['none']
+        self.ranged_weapon = RANGED['none']
+        self.ammo_type = AMMO['none']
         self.ammo_amount = 0
-        self.helmet = "Empty"
-        self.gloves = "Empty"
-        self.chest = "Empty"
-        self.legs = "Empty"
-        self.boots = "Empty"
-        self.amulet = "Empty"
-        self.ring = "Empty"
+        self.helmet = ARMOR['none']
+        self.gloves = ARMOR['none']
+        self.chest = ARMOR['none']
+        self.legs = ARMOR['none']
+        self.boots = ARMOR['none']
+        self.amulet = "-"
+        self.ring = "-"
 
     def assign_class(self, event):
         if event.key == pygame.K_1:
             self.character_class = "Warrior"
-            self.equipped_weapon = 'Dagger'
+            # starting stats
             self.strength     = 4
             self.dexterity    = 2
             self.intelligence = 2
             self.agility      = 2
             self.endurance    = 4
             self.wisdom       = 1
+            # starting inventory
+            self.melee_weapon = MELEE['rusty_sword']
+            self.legs = ARMOR['cloth_pants']
         if event.key == pygame.K_2:
             self.character_class = "Archer"
-            self.equipped_weapon = 'Bow'
+            # starting stats
             self.strength     = 2
             self.dexterity    = 4
             self.intelligence = 2
             self.agility      = 2
             self.endurance    = 3
             self.wisdom       = 2
+            # starting inventory
+            self.ranged_weapon = RANGED['slingshot']
+            self.ammo_type = AMMO['rocks']
+            self.ammo_amount = 25
+            self.legs = ARMOR['cloth_pants']
         if event.key == pygame.K_3:
             self.character_class = "Mage"
-            self.equipped_weapon = 'Staff'
+            # starting stats
             self.strength     = 1
             self.dexterity    = 2
             self.intelligence = 4
             self.agility      = 2
             self.endurance    = 2
             self.wisdom       = 4
-
-        # Set All Other Equippable Slots to None Besides Starting Weapon
-        self.equipped_armor  = 'None'
-        self.equipped_helmet = 'None'
-        self.equipped_boots  = 'None'
-        # etc...
+            # starting inventory
+            self.helmet = ARMOR['cloth_hat']
+            self.chest = ARMOR['cloth_robe']
 
         # All of the starting derived values based on stats
         self.max_hit_points = 5 + self.endurance * 3
@@ -122,7 +129,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.game.draw_text(self.game.screen, "MP  : " + str(self.current_mana_points) + "/" + str(self.max_mana_points),
                                 32, WHITE, WIDTH / 2 + 10, 4 * HEIGHT / 16, False)
 
-            self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power),
+            self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power) + " + "
+                                + str(self.melee_weapon['Damage']) + " = " + str(self.melee_attack_power + self.melee_weapon['Damage']),
                                 32, WHITE, WIDTH / 2 + 10, 6 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Attack : " + str(self.range_attack_power),
                                 32, WHITE, WIDTH / 2 + 10, 7 * HEIGHT / 16, False)
@@ -149,7 +157,7 @@ class Player(Actor, pygame.sprite.Sprite):
                 # Quit if player exits game
                 if event.type == pygame.QUIT:
                     waiting = False
-                    self.running = False
+                    self.game.running = False
 
                 # All keydown events
                 if event.type == pygame.KEYDOWN:
@@ -169,24 +177,28 @@ class Player(Actor, pygame.sprite.Sprite):
             self.game.draw_text(self.game.screen, "Inventory", 32,
                                 LIGHT_BLUE, 10, HEIGHT / 16, False)
             # WEAPONS
-            self.game.draw_text(self.game.screen, "Melee Weapon : " + self.melee_weapon, 32,
+            self.game.draw_text(self.game.screen, "Melee Weapon : " + self.melee_weapon['Name'], 32,
                                 WHITE, 10, 3 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Shield       : " + self.shield, 32,
+            self.game.draw_text(self.game.screen, "Shield       : " + self.shield['Name'], 32,
                                 WHITE, 10, 4 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Ranged Weapon: " + self.ranged_weapon, 32,
+            self.game.draw_text(self.game.screen, "Ranged Weapon: " + self.ranged_weapon['Name'], 32,
                                 WHITE, 10, 5 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Ammo         : " + str(self.ammo_amount) + " x " + self.ammo_type, 32,
+            if self.ammo_amount == 0:
+                self.game.draw_text(self.game.screen, "Ammo         : -", 32,
+                                    WHITE, 10, 6 * HEIGHT / 16, False)
+            else:
+                self.game.draw_text(self.game.screen, "Ammo         : " + str(self.ammo_amount) + " x " + self.ammo_type['Name'], 32,
                                 WHITE, 10, 6 * HEIGHT / 16, False)
             # ARMOR
-            self.game.draw_text(self.game.screen, "Helmet       : " + self.helmet, 32,
+            self.game.draw_text(self.game.screen, "Helmet       : " + self.helmet['Name'], 32,
                                 WHITE, 10, 8 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Gloves       : " + self.gloves, 32,
+            self.game.draw_text(self.game.screen, "Gloves       : " + self.gloves['Name'], 32,
                                 WHITE, 10, 9 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Chest        : " + self.chest, 32,
+            self.game.draw_text(self.game.screen, "Chest        : " + self.chest['Name'], 32,
                                 WHITE, 10, 10 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Legs         : " + self.legs, 32,
+            self.game.draw_text(self.game.screen, "Legs         : " + self.legs['Name'], 32,
                                 WHITE, 10, 11 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Boots        : " + self.boots, 32,
+            self.game.draw_text(self.game.screen, "Boots        : " + self.boots['Name'], 32,
                                 WHITE, 10, 12 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Amulet       : " + self.amulet, 32,
                                 WHITE, 10, 14 * HEIGHT / 16, False)
@@ -201,7 +213,7 @@ class Player(Actor, pygame.sprite.Sprite):
                 # Quit if player exits game
                 if event.type == pygame.QUIT:
                     waiting = False
-                    self.running = False
+                    self.game.running = False
 
                 # All keydown events
                 if event.type == pygame.KEYDOWN:
