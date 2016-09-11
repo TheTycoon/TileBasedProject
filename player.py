@@ -19,15 +19,15 @@ class Player(Actor, pygame.sprite.Sprite):
 
         # inventory stuff
         self.melee_weapon = MELEE['none']
-        self.shield = ARMOR['none']
+        self.shield = SHIELD['none']
         self.ranged_weapon = RANGED['none']
         self.ammo_type = AMMO['none']
         self.ammo_amount = 0
-        self.helmet = ARMOR['none']
-        self.gloves = ARMOR['none']
-        self.chest = ARMOR['none']
-        self.legs = ARMOR['none']
-        self.boots = ARMOR['none']
+        self.helmet = HELMET['none']
+        self.gloves = GLOVES['none']
+        self.chest = CHEST['none']
+        self.legs = LEGS['none']
+        self.boots = BOOTS['none']
         self.amulet = "-"
         self.ring = "-"
 
@@ -43,7 +43,7 @@ class Player(Actor, pygame.sprite.Sprite):
             self.wisdom       = 1
             # starting inventory
             self.melee_weapon = MELEE['rusty_sword']
-            self.legs = ARMOR['cloth_pants']
+            self.legs = LEGS['cloth_pants']
         if event.key == pygame.K_2:
             self.character_class = "Archer"
             # starting stats
@@ -57,7 +57,7 @@ class Player(Actor, pygame.sprite.Sprite):
             self.ranged_weapon = RANGED['slingshot']
             self.ammo_type = AMMO['rocks']
             self.ammo_amount = 25
-            self.legs = ARMOR['cloth_pants']
+            self.legs = LEGS['cloth_pants']
         if event.key == pygame.K_3:
             self.character_class = "Mage"
             # starting stats
@@ -68,8 +68,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.endurance    = 2
             self.wisdom       = 4
             # starting inventory
-            self.helmet = ARMOR['cloth_hat']
-            self.chest = ARMOR['cloth_robe']
+            self.helmet = HELMET['cloth_hat']
+            self.chest = CHEST['cloth_robe']
 
         # All of the starting derived values based on stats
         self.max_hit_points = 5 + self.endurance * 3
@@ -129,8 +129,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.game.draw_text(self.game.screen, "MP  : " + str(self.current_mana_points) + "/" + str(self.max_mana_points),
                                 32, WHITE, WIDTH / 2 + 10, 4 * HEIGHT / 16, False)
 
-            self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power) + " + "
-                                + str(self.melee_weapon['Damage']) + " = " + str(self.melee_attack_power + self.melee_weapon['Damage']),
+            self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power) + "+"
+                                + str(self.melee_weapon['Damage']) + "=" + str(self.melee_attack_power + self.melee_weapon['Damage']),
                                 32, WHITE, WIDTH / 2 + 10, 6 * HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Attack : " + str(self.range_attack_power),
                                 32, WHITE, WIDTH / 2 + 10, 7 * HEIGHT / 16, False)
