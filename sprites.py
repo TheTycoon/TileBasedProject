@@ -101,8 +101,19 @@ class Wall(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(WHITE)
+        self.image = game.red_brick_wall
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+
+class Floor(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.floors
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = game.wood_floor
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y

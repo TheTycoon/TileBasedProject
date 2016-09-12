@@ -46,19 +46,25 @@ class Game:
 
     def load_data(self):
         # Easy names to start file directories
-        game_folder = path.dirname(__file__)
-        img_folder = path.join(game_folder, 'img')
+        self.game_folder = path.dirname(__file__)
+        self.img_folder = path.join(self.game_folder, 'img')
 
         # load all image and sound files
-        self.attack_icon = pygame.image.load(path.join(img_folder, 'sword1.png')).convert_alpha()
-        self.magic_icon = pygame.image.load(path.join(img_folder, 'fireball.png')).convert_alpha()
-        self.enemy_icon = pygame.image.load(path.join(img_folder, 'slime_red.png')).convert_alpha()
-        self.player_icon = pygame.image.load(path.join(img_folder, 'player_image.png')).convert_alpha()
+        self.attack_icon = pygame.image.load(path.join(self.img_folder, 'rusty_sword.png')).convert_alpha()
+        self.slingshot_icon = pygame.image.load(path.join(self.img_folder, 'slingshot.png')).convert_alpha()
+        self.rock_icon = pygame.image.load(path.join(self.img_folder, 'rock.png')).convert_alpha()
+        self.magic_icon = pygame.image.load(path.join(self.img_folder, 'fireball.png')).convert_alpha()
+        self.enemy_icon = pygame.image.load(path.join(self.img_folder, 'slime_red.png')).convert_alpha()
+        self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_image.png')).convert_alpha()
+        self.bare_hands_icon = pygame.image.load(path.join(self.img_folder, 'bare_hands.png')).convert_alpha()
+
+        self.red_brick_wall = pygame.image.load(path.join(self.img_folder, 'red_brick_wall.png')).convert_alpha()
+        self.wood_floor = pygame.image.load(path.join(self.img_folder, 'wood_floor.png')).convert_alpha()
 
 
         # Load map from text file
         self.map_data = []
-        with open(path.join(game_folder, 'map.txt'), 'rt') as file:
+        with open(path.join(self.game_folder, 'map.txt'), 'rt') as file:
             for line in file:
                 self.map_data.append(line)
 
@@ -67,8 +73,10 @@ class Game:
 
         # Declare Sprite Groups
         self.all_sprites = pygame.sprite.Group()
+        self.players = pygame.sprite.Group()
         self.mobs = pygame.sprite.Group()
         self.walls = pygame.sprite.Group()
+        self.floors = pygame.sprite.Group()
 
         # Iterate through the map.txt file to initialize the player and starting enemies/walls
         for row, tiles in enumerate(self.map_data):
@@ -79,6 +87,8 @@ class Game:
                     Enemy(self, col, row)
                 if tile == '1':
                     Wall(self, col, row)
+                if tile == '.':
+                    Floor(self, col, row)
 
     def run(self):
         self.playing = True
@@ -163,17 +173,16 @@ class Game:
             pygame.draw.rect(self.screen, SILVER, (5 + ((5 + TILESIZE) * i), HEIGHT - 36, 32, 32))
 
         # Draw Icons in Action Bar
-        attack_icon = self.attack_icon
-        attack_rect = attack_icon.get_rect()
-        attack_rect.x = 5
-        attack_rect.y = HEIGHT - 36
-        self.screen.blit(attack_icon, attack_rect)
+        for i in range(0, len(self.player.actions)):
+            temp_icon = self.player.actions[i]
+            temp_rect = temp_icon.get_rect()
+            temp_rect.x = 5 + (5 + TILESIZE) * i
+            temp_rect.y = HEIGHT - 36
+            self.screen.blit(temp_icon, temp_rect)
 
-        magic_icon = self.magic_icon
-        magic_rect = attack_icon.get_rect()
-        magic_rect.x = 5 + (5 + TILESIZE)
-        magic_rect.y = HEIGHT - 36
-        self.screen.blit(magic_icon, magic_rect)
+
+
+
 
         # Draw Numbers in Action Bar
         for i in range(10):
@@ -214,6 +223,10 @@ class Game:
         elif self.machine.state == 'menu_inventory':
             self.player.draw_inventory()
         else:
+            # Draw all sprites, the grid, and the UI
+            self.draw_grid()
+            self.floors.draw(self.screen)
+
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
                 self.player.draw_move_area()
@@ -222,10 +235,12 @@ class Game:
             if self.machine.state == 'player_turn_magic':
                 self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
 
-            # Draw all sprites, the grid, and the UI
-            self.all_sprites.draw(self.screen)
-            self.draw_grid()
+            self.walls.draw(self.screen)
+            self.mobs.draw(self.screen)
+            self.players.draw(self.screen)
             self.draw_ui()
+
+
 
 
 

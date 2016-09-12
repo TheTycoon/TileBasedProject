@@ -6,7 +6,7 @@ from armors import *
 class Player(Actor, pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         Actor.__init__(self, game, x, y)
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites, game.players
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.initial_x = x
         self.initial_y = y
@@ -31,6 +31,10 @@ class Player(Actor, pygame.sprite.Sprite):
         self.amulet = "-"
         self.ring = "-"
 
+    # method to update current images being used by player?      def load_current_images(self):
+
+
+
     def assign_class(self, event):
         if event.key == pygame.K_1:
             self.character_class = "Warrior"
@@ -44,6 +48,8 @@ class Player(Actor, pygame.sprite.Sprite):
             # starting inventory
             self.melee_weapon = MELEE['rusty_sword']
             self.legs = LEGS['cloth_pants']
+            self.actions = [self.game.attack_icon]
+
         if event.key == pygame.K_2:
             self.character_class = "Archer"
             # starting stats
@@ -58,6 +64,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.ammo_type = AMMO['rocks']
             self.ammo_amount = 25
             self.legs = LEGS['cloth_pants']
+            self.actions = [self.game.bare_hands_icon, self.game.slingshot_icon]
+
         if event.key == pygame.K_3:
             self.character_class = "Mage"
             # starting stats
@@ -70,6 +78,7 @@ class Player(Actor, pygame.sprite.Sprite):
             # starting inventory
             self.helmet = HELMET['cloth_hat']
             self.chest = CHEST['cloth_robe']
+            self.actions = [self.game.bare_hands_icon, self.game.magic_icon]
 
         # All of the starting derived values based on stats
         self.max_hit_points = 5 + self.endurance * 3
@@ -189,6 +198,17 @@ class Player(Actor, pygame.sprite.Sprite):
             else:
                 self.game.draw_text(self.game.screen, "Ammo         : " + str(self.ammo_amount) + " x " + self.ammo_type['Name'], 32,
                                 WHITE, 10, 6 * HEIGHT / 16, False)
+
+                ammo_icon = self.game.rock_icon
+                ammo_rect = ammo_icon.get_rect()
+                ammo_rect.x = WIDTH / 2
+                ammo_rect.y = 6 * HEIGHT / 16
+                self.game.screen.blit(ammo_icon, ammo_rect)
+
+
+
+
+
             # ARMOR
             self.game.draw_text(self.game.screen, "Helmet       : " + self.helmet['Name'], 32,
                                 WHITE, 10, 8 * HEIGHT / 16, False)
