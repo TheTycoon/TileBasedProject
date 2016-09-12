@@ -83,8 +83,10 @@ class Game:
             for col, tile in enumerate(tiles):
                 if tile == 'P':
                     self.player = Player(self, col, row)
+                    Floor(self, col, row)
                 if tile == 'E':
                     Enemy(self, col, row)
+                    Floor(self, col, row)
                 if tile == '1':
                     Wall(self, col, row)
                 if tile == '.':
