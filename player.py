@@ -31,10 +31,6 @@ class Player(Actor, pygame.sprite.Sprite):
         self.amulet = "-"
         self.ring = "-"
 
-    # method to update current images being used by player?      def load_current_images(self):
-
-
-
     def assign_class(self, event):
         if event.key == pygame.K_1:
             self.character_class = "Warrior"
@@ -48,7 +44,7 @@ class Player(Actor, pygame.sprite.Sprite):
             # starting inventory
             self.melee_weapon = MELEE['rusty_sword']
             self.legs = LEGS['cloth_pants']
-            self.actions = [self.game.attack_icon]
+            self.actions = [self.game.sword_icon, self.game.dash_skill_icon]
 
         if event.key == pygame.K_2:
             self.character_class = "Archer"
@@ -64,6 +60,7 @@ class Player(Actor, pygame.sprite.Sprite):
             self.ammo_type = AMMO['rocks']
             self.ammo_amount = 25
             self.legs = LEGS['cloth_pants']
+            # starting skills, spells, used for action bar
             self.actions = [self.game.bare_hands_icon, self.game.slingshot_icon]
 
         if event.key == pygame.K_3:
@@ -159,7 +156,6 @@ class Player(Actor, pygame.sprite.Sprite):
 
             # End Drawing Frame
             pygame.display.flip()
-
 
             # Get Events
             for event in pygame.event.get():

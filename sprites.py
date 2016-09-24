@@ -98,10 +98,10 @@ class Enemy(Actor, pygame.sprite.Sprite):
 
 
 class Wall(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, image):
         self.groups = game.all_sprites, game.walls
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = game.red_brick_wall
+        self.image = image
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y

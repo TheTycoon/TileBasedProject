@@ -16,8 +16,6 @@ BROWN      = (165,  42,  42)
 LIGHT_BLUE = (135, 206, 250)
 SILVER     = (192, 192, 192)
 
-
-
 # game settings
 WIDTH = 1024
 HEIGHT = 704

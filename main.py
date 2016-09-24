@@ -1,8 +1,6 @@
 from pygame.locals import *
 from os import path
-
 from player import *
-
 from transitions.extensions import HierarchicalMachine as Machine
 
 
@@ -50,15 +48,16 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'img')
 
         # load all image and sound files
-        self.attack_icon = pygame.image.load(path.join(self.img_folder, 'rusty_sword.png')).convert_alpha()
+        self.sword_icon = pygame.image.load(path.join(self.img_folder, 'rusty_sword.png')).convert_alpha()
         self.slingshot_icon = pygame.image.load(path.join(self.img_folder, 'slingshot.png')).convert_alpha()
         self.rock_icon = pygame.image.load(path.join(self.img_folder, 'rock.png')).convert_alpha()
         self.magic_icon = pygame.image.load(path.join(self.img_folder, 'fireball.png')).convert_alpha()
         self.enemy_icon = pygame.image.load(path.join(self.img_folder, 'slime_red.png')).convert_alpha()
         self.player_icon = pygame.image.load(path.join(self.img_folder, 'player_image.png')).convert_alpha()
         self.bare_hands_icon = pygame.image.load(path.join(self.img_folder, 'bare_hands.png')).convert_alpha()
+        self.dash_skill_icon = pygame.image.load(path.join(self.img_folder, 'dash_skill_icon.png')).convert_alpha()
 
-        self.red_brick_wall = pygame.image.load(path.join(self.img_folder, 'red_brick_wall.png')).convert_alpha()
+        self.dark_grey_brick_wall = pygame.image.load(path.join(self.img_folder, 'dark_grey_brick_wall.png')).convert_alpha()
         self.wood_floor = pygame.image.load(path.join(self.img_folder, 'wood_floor.png')).convert_alpha()
 
 
@@ -88,7 +87,7 @@ class Game:
                     Enemy(self, col, row)
                     Floor(self, col, row)
                 if tile == '1':
-                    Wall(self, col, row)
+                    Wall(self, col, row, game.dark_grey_brick_wall)
                 if tile == '.':
                     Floor(self, col, row)
 
@@ -154,9 +153,11 @@ class Game:
         pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
 
         if type == 'health':
-            self.draw_text(self.screen, "Health", 14, WHITE, WIDTH - 135, HEIGHT - 38, True)
+            self.draw_text(self.screen, "Health: " + str(self.player.current_hit_points) + "/" + str(self.player.max_hit_points),
+                           14, WHITE, WIDTH - 175, HEIGHT - 38, True)
         if type == 'mana':
-            self.draw_text(self.screen, "Mana", 14, WHITE, WIDTH - 135, HEIGHT - 23, True)
+            self.draw_text(self.screen, "Mana: " + str(self.player.current_mana_points) + "/" + str(self.player.max_mana_points),
+                           14, WHITE, WIDTH - 175, HEIGHT - 23, True)
 
     def draw_enemy_info(self):
         image = self.player.selected_mob.image
@@ -242,10 +243,6 @@ class Game:
             self.players.draw(self.screen)
             self.draw_ui()
 
-
-
-
-
         # DISPLAY FRAME = STOP DRAWING
         pygame.display.flip()
 
@@ -277,7 +274,6 @@ class Game:
                     if event.key == K_ESCAPE:
                         waiting = False
                         self.running = False
-
 
     def show_end_screen(self):
         # Game Over Screen

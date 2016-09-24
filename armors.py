@@ -20,6 +20,12 @@ GLOVES = {
         'Ranged': 0,
         'Magic': 0,
     },
+    'cloth_gloves': {
+        'Name': 'Cloth Gloves',
+        'Melee': 0,
+        'Ranged': 0,
+        'Magic': 1,
+    },
 }
 
 SHIELD = {
@@ -37,6 +43,12 @@ CHEST = {
         'Melee': 0,
         'Ranged': 0,
         'Magic': 0,
+    },
+    'cloth_shirt': {
+        'Name': 'Cloth Shirt',
+        'Melee': 1,
+        'Ranged': 0,
+        'Magic': 0
     },
     'cloth_robe': {
         'Name': 'Cloth Robe',
@@ -64,6 +76,12 @@ LEGS = {
 BOOTS = {
     'none': {
         'Name': '-',
+        'Melee': 0,
+        'Ranged': 0,
+        'Magic': 0,
+    },
+    'cloth_boots': {
+        'Name': 'Cloth Boots',
         'Melee': 0,
         'Ranged': 0,
         'Magic': 0,
