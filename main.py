@@ -1,6 +1,7 @@
 from pygame.locals import *
 from os import path
 from player import *
+from tilemap import *
 from transitions.extensions import HierarchicalMachine as Machine
 
 
@@ -46,6 +47,14 @@ class Game:
         # Easy names to start file directories
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'img')
+        self.map_folder = path.join(self.game_folder, 'maps')
+
+        self.map = Map(path.join(self.map_folder, 'map2.tmx'))
+        self.map_img = self.map.make_map()
+        self.map_rect = self.map_img.get_rect()
+
+
+
 
         # load all image and sound files
         self.sword_icon = pygame.image.load(path.join(self.img_folder, 'rusty_sword.png')).convert_alpha()
@@ -77,7 +86,9 @@ class Game:
         self.walls = pygame.sprite.Group()
         self.floors = pygame.sprite.Group()
 
+        self.player = Player(self, 4, 4)
         # Iterate through the map.txt file to initialize the player and starting enemies/walls
+        '''
         for row, tiles in enumerate(self.map_data):
             for col, tile in enumerate(tiles):
                 if tile == 'P':
@@ -90,6 +101,7 @@ class Game:
                     Wall(self, col, row, game.dark_grey_brick_wall)
                 if tile == '.':
                     Floor(self, col, row)
+        '''
 
     def run(self):
         self.playing = True
@@ -218,7 +230,8 @@ class Game:
         pygame.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
         # DRAW EVERYTHING FOR ONE FRAME
-        self.screen.fill(BLACK)
+        #self.screen.fill(BLACK)
+        self.screen.blit(self.map_img, self.map_rect)
 
         # Draw the correct state (Basically the world or a menu)
         if self.machine.state == 'menu_character':
@@ -227,7 +240,7 @@ class Game:
             self.player.draw_inventory()
         else:
             # Draw all sprites, the grid, and the UI
-            self.draw_grid()
+            #self.draw_grid()
             self.floors.draw(self.screen)
 
             # Draw highlighted area depending on what action is happening
