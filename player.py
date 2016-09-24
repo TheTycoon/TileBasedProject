@@ -293,6 +293,7 @@ class Player(Actor, pygame.sprite.Sprite):
                                           TILESIZE, TILESIZE))
 
     def take_turn(self, event):
+        # All of the actions you can do while able to move around
         if self.game.machine.state == 'player_turn_moving':
             if event.type == pygame.KEYDOWN:
                 # player movement
@@ -334,6 +335,7 @@ class Player(Actor, pygame.sprite.Sprite):
                 if event.key == pygame.K_i:
                     self.game.machine.open_inventory_menu()
 
+        # All of the actions you can do after selecting an attack
         if self.game.machine.state == 'player_turn_attack':
             if event.type == pygame.KEYDOWN:
 

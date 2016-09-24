@@ -1,3 +1,11 @@
+'''
+
+NOT CURRENTLY USING THIS FOR ANYTHING
+
+'''
+
+
+
 class Skill:
     def __init__(self, name):
         self.name = name
@@ -19,10 +27,7 @@ class passiveSkill(Skill):
         self.state = False
 
     def activate(self):
-        if self.state == False:
-            self.state = True
-        if self.state == True:
-            self.state = False
+        self.state = not self.state
 
 
 # Testing Skills Down Here
