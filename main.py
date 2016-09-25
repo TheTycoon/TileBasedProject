@@ -73,29 +73,15 @@ class Game:
         # Make a list of walls, maybe change these to be call obstacles
         self.walls = []
 
+        # Initialize Map Objects
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'player':
                 self.player = Player(self, tile_object.x / TILESIZE, tile_object.y / TILESIZE)
             if tile_object.name == 'wall':
                 wall = Wall(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
                 self.walls.append(wall)
-
-
-        # Iterate through the map.txt file to initialize the player and starting enemies/walls
-        '''
-        for row, tiles in enumerate(self.map_data):
-            for col, tile in enumerate(tiles):
-                if tile == 'P':
-                    self.player = Player(self, col, row)
-                    Floor(self, col, row)
-                if tile == 'E':
-                    Enemy(self, col, row)
-                    Floor(self, col, row)
-                if tile == '1':
-                    Wall(self, col, row, game.dark_grey_brick_wall)
-                if tile == '.':
-                    Floor(self, col, row)
-        '''
+            if tile_object.name == 'mob':
+                Enemy(self, tile_object.x / TILESIZE, tile_object.y / TILESIZE)
 
     def run(self):
         self.playing = True
@@ -189,10 +175,6 @@ class Game:
             temp_rect.y = HEIGHT - 36
             self.screen.blit(temp_icon, temp_rect)
 
-
-
-
-
         # Draw Numbers in Action Bar
         for i in range(10):
             self.draw_text(self.screen, str((i + 1) % 10), 12, BLACK, 10 + ((5 + TILESIZE) * i), HEIGHT - 36, True)
@@ -238,7 +220,8 @@ class Game:
 
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
-                self.player.draw_move_area()
+                #self.player.draw_move_area()
+                self.player.draw_range_area(self.player.current_action_points, 'filled', YELLOW)
             if self.machine.state == 'player_turn_attack':
                 self.player.draw_range_area(self.player.attack_range, 'straight', RED)
             if self.machine.state == 'player_turn_magic':

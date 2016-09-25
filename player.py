@@ -11,7 +11,8 @@ class Player(Actor, pygame.sprite.Sprite):
         self.initial_x = x
         self.initial_y = y
         self.image = self.game.player_icon
-        self.move_range = 1
+        self.max_action_points = 4
+        self.current_action_points = 4
         self.attack_range = 1
         self.spell_range = 2
         self.spell_cost = 5
@@ -157,7 +158,7 @@ class Player(Actor, pygame.sprite.Sprite):
 
             self.game.draw_text(self.game.screen, "Dodge Chance  : " + str(self.agility) + "%",
                                 32, WHITE, WIDTH / 2 + 10, 13 * HEIGHT / 16, False)
-            self.game.draw_text(self.game.screen, "Move Range    : " + str(self.move_range),
+            self.game.draw_text(self.game.screen, "Action Points : " + str(self.max_action_points),
                                 32, WHITE, WIDTH / 2 + 10, 14 * HEIGHT / 16, False)
 
             # End Drawing Frame
@@ -247,24 +248,25 @@ class Player(Actor, pygame.sprite.Sprite):
     def initialize_turn(self):
         self.initial_x = self.x
         self.initial_y = self.y
+        self.current_action_points = self.max_action_points
 
     def draw_move_area(self):
-        for i in range(0, self.move_range + 1):
-            for j in range(0, self.move_range + 1):
-                if i + j <= self.move_range:
-                    if not self.collide_with_walls(i, j):
+        for i in range(0, self.current_action_points + 1):
+            for j in range(0, self.current_action_points + 1):
+                if i + j <= self.current_action_points:
+                    if not self.collide_with_walls(dx=i, dy=j):
                         pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    if not self.collide_with_walls(i, -j):
+                    if not self.collide_with_walls(dx=i, dy=-j):
                         pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    if not self.collide_with_walls(-i, j):
+                    if not self.collide_with_walls(dx=-i, dy=j):
                         pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    if not self.collide_with_walls(-i, -j):
+                    if not self.collide_with_walls(dx=-i, dy=-j):
                         pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
@@ -307,14 +309,26 @@ class Player(Actor, pygame.sprite.Sprite):
         if self.game.machine.state == 'player_turn_moving':
             if event.type == pygame.KEYDOWN:
                 # player movement
-                if event.key == pygame.K_LEFT and abs(self.initial_x - (self.x - 1)) + abs(self.initial_y - self.y) <= self.move_range:
+                if event.key == pygame.K_LEFT:
                     self.move(dx=-1)
-                if event.key == pygame.K_RIGHT and abs(self.initial_x - (self.x + 1)) + abs(self.initial_y - self.y) <= self.move_range:
+                    self.current_action_points -= 1
+                    if self.current_action_points <= 0:
+                        self.game.machine.end_player_turn()
+                if event.key == pygame.K_RIGHT:
                     self.move(dx=1)
-                if event.key == pygame.K_UP and abs(self.initial_y - (self.y - 1)) + abs(self.initial_x - self.x) <= self.move_range:
+                    self.current_action_points -= 1
+                    if self.current_action_points <= 0:
+                        self.game.machine.end_player_turn()
+                if event.key == pygame.K_UP:
                     self.move(dy=-1)
-                if event.key == pygame.K_DOWN and abs(self.initial_y - (self.y + 1)) + abs(self.initial_x - self.x) <= self.move_range:
+                    self.current_action_points -= 1
+                    if self.current_action_points <= 0:
+                        self.game.machine.end_player_turn()
+                if event.key == pygame.K_DOWN:
                     self.move(dy=1)
+                    self.current_action_points -= 1
+                    if self.current_action_points <= 0:
+                        self.game.machine.end_player_turn()
 
                 if event.key == pygame.K_1:
                     self.targets = []

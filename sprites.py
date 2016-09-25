@@ -43,8 +43,8 @@ class Actor:
     '''
     def collide_with_walls(self, dx=0, dy=0):
         for wall in self.game.walls:
-            if (self.initial_x + dx) * TILESIZE in range(wall.rect.x, wall.rect.x + wall.rect.width) and \
-                    (self.initial_y + dy) * TILESIZE in range(wall.rect.y, wall.rect.y + wall.rect.height):
+            if (self.x + dx) * TILESIZE in range(wall.rect.x, wall.rect.x + wall.rect.width) and \
+                    (self.y + dy) * TILESIZE in range(wall.rect.y, wall.rect.y + wall.rect.height):
                 return True
         return False
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="22" tilewidth="32" tileheight="32" nextobjectid="35">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="22" tilewidth="32" tileheight="32" nextobjectid="39">
  <tileset firstgid="1" name="Main Sheet" tilewidth="32" tileheight="32" spacing="10" tilecount="8" columns="4">
   <image source="../tilesets/2x4 Sheet1.png" width="158" height="74"/>
  </tileset>
@@ -84,5 +84,6 @@
   <object id="32" name="wall" x="512" y="608" width="32" height="96"/>
   <object id="33" name="wall" x="416" y="672" width="96" height="32"/>
   <object id="34" name="wall" x="960" y="480" width="32" height="160"/>
+  <object id="38" name="mob" x="288" y="128" width="32" height="32"/>
  </objectgroup>
 </map>
