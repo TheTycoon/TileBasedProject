@@ -13,7 +13,7 @@ class Player(Actor, pygame.sprite.Sprite):
         self.image = self.game.player_icon
         self.max_action_points = 4
         self.current_action_points = 4
-        self.attack_range = 1
+        self.attack_range = 3
         self.spell_range = 2
         self.spell_cost = 5
         self.turn = 0
@@ -281,19 +281,66 @@ class Player(Actor, pygame.sprite.Sprite):
                         temp_rect = temp_surface.get_rect()
                         temp_surface.fill(color, temp_rect)
                         temp_surface.set_alpha(100)
-                        temp_rect.x = (self.x + i) * TILESIZE
-                        temp_rect.y = (self.y + j) * TILESIZE
-                        self.game.screen.blit(temp_surface, temp_rect)
-                        temp_rect.x = (self.x + i) * TILESIZE
-                        temp_rect.y = (self.y - j) * TILESIZE
-                        self.game.screen.blit(temp_surface, temp_rect)
-                        temp_rect.x = (self.x - i) * TILESIZE
-                        temp_rect.y = (self.y + j) * TILESIZE
-                        self.game.screen.blit(temp_surface, temp_rect)
-                        temp_rect.x = (self.x - i) * TILESIZE
-                        temp_rect.y = (self.y - j) * TILESIZE
-                        self.game.screen.blit(temp_surface, temp_rect)
 
+                        if i == 0 and j != 0:
+                            temp_rect.x = self.x * TILESIZE
+                            temp_rect.y = (self.y + j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                            temp_rect.x = self.x * TILESIZE
+                            temp_rect.y = (self.y - j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                        elif i != 0 and j == 0:
+                            temp_rect.x = (self.x + i) * TILESIZE
+                            temp_rect.y = self.y * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                            temp_rect.x = (self.x - i) * TILESIZE
+                            temp_rect.y = self.y * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                        else:
+                            temp_rect.x = (self.x + i) * TILESIZE
+                            temp_rect.y = (self.y + j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                            temp_rect.x = (self.x + i) * TILESIZE
+                            temp_rect.y = (self.y - j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                            temp_rect.x = (self.x - i) * TILESIZE
+                            temp_rect.y = (self.y + j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+                            temp_rect.x = (self.x - i) * TILESIZE
+                            temp_rect.y = (self.y - j) * TILESIZE
+                            self.game.screen.blit(temp_surface, temp_rect)
+
+        if type == 'straight':
+            for i in range(value + 1):
+                temp_surface = pygame.Surface((TILESIZE, TILESIZE))
+                temp_rect = temp_surface.get_rect()
+                temp_surface.fill(color, temp_rect)
+                temp_surface.set_alpha(100)
+
+                temp_rect.x = self.x * TILESIZE
+                temp_rect.y = (self.y + i) * TILESIZE
+                self.game.screen.blit(temp_surface, temp_rect)
+
+                temp_rect.x = self.x * TILESIZE
+                temp_rect.y = (self.y - i) * TILESIZE
+                self.game.screen.blit(temp_surface, temp_rect)
+
+                temp_rect.x = (self.x + i) * TILESIZE
+                temp_rect.y = self.y * TILESIZE
+                self.game.screen.blit(temp_surface, temp_rect)
+
+                temp_rect.x = (self.x - i) * TILESIZE
+                temp_rect.y = self.y * TILESIZE
+                self.game.screen.blit(temp_surface, temp_rect)
+
+        '''
         if type == 'straight':
             for i in range(value + 1):
                 pygame.draw.rect(self.game.screen, color,
@@ -308,23 +355,6 @@ class Player(Actor, pygame.sprite.Sprite):
                 pygame.draw.rect(self.game.screen, color,
                                  (self.x * TILESIZE, (self.y - i) * TILESIZE,
                                   TILESIZE, TILESIZE))
-        '''
-        if type == 'filled':
-            for i in range(0, value + 1):
-                for j in range(0, value + 1):
-                    if i + j <= value:
-                        pygame.draw.rect(self.game.screen, color,
-                                         ((self.x + i) * TILESIZE, (self.y + j) * TILESIZE,
-                                          TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, color,
-                                         ((self.x + i) * TILESIZE, (self.y - j) * TILESIZE,
-                                          TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, color,
-                                         ((self.x - i) * TILESIZE, (self.y + j) * TILESIZE,
-                                          TILESIZE, TILESIZE))
-                        pygame.draw.rect(self.game.screen, color,
-                                         ((self.x - i) * TILESIZE, (self.y - j) * TILESIZE,
-                                          TILESIZE, TILESIZE))
         '''
 
     def take_turn(self, event):
