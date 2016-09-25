@@ -49,12 +49,10 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'img')
         self.map_folder = path.join(self.game_folder, 'maps')
 
+        # load Tiled map stuff
         self.map = Map(path.join(self.map_folder, 'map1.tmx'))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
-
-
-
 
         # load all image and sound files
         self.sword_icon = pygame.image.load(path.join(self.img_folder, 'rusty_sword.png')).convert_alpha()
@@ -66,27 +64,23 @@ class Game:
         self.bare_hands_icon = pygame.image.load(path.join(self.img_folder, 'bare_hands.png')).convert_alpha()
         self.dash_skill_icon = pygame.image.load(path.join(self.img_folder, 'dash_skill_icon.png')).convert_alpha()
 
-        self.dark_grey_brick_wall = pygame.image.load(path.join(self.img_folder, 'dark_grey_brick_wall.png')).convert_alpha()
-        self.wood_floor = pygame.image.load(path.join(self.img_folder, 'wood_floor.png')).convert_alpha()
-
-
-        # Load map from text file
-        self.map_data = []
-        with open(path.join(self.game_folder, 'map.txt'), 'rt') as file:
-            for line in file:
-                self.map_data.append(line)
-
     def new(self):
         # start a new game
 
         # Declare Sprite Groups
         self.all_sprites = pygame.sprite.Group()
-        self.players = pygame.sprite.Group()
         self.mobs = pygame.sprite.Group()
-        self.walls = pygame.sprite.Group()
-        self.floors = pygame.sprite.Group()
+        # Make a list of walls, maybe change these to be call obstacles
+        self.walls = []
 
-        self.player = Player(self, 4, 4)
+        for tile_object in self.map.tmxdata.objects:
+            if tile_object.name == 'player':
+                self.player = Player(self, tile_object.x / TILESIZE, tile_object.y / TILESIZE)
+            if tile_object.name == 'wall':
+                wall = Wall(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+                self.walls.append(wall)
+
+
         # Iterate through the map.txt file to initialize the player and starting enemies/walls
         '''
         for row, tiles in enumerate(self.map_data):
@@ -241,7 +235,6 @@ class Game:
         else:
             # Draw all sprites, the grid, and the UI
             #self.draw_grid()
-            self.floors.draw(self.screen)
 
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
@@ -251,9 +244,12 @@ class Game:
             if self.machine.state == 'player_turn_magic':
                 self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
 
-            self.walls.draw(self.screen)
             self.mobs.draw(self.screen)
-            self.players.draw(self.screen)
+
+            #self.players.draw(self.screen)
+            self.player.draw_sprite()
+
+
             self.draw_ui()
 
         # DISPLAY FRAME = STOP DRAWING

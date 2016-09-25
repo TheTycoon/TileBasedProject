@@ -34,9 +34,17 @@ class Actor:
             target.kill()
             self.experience += target.experience_worth
 
+    '''
     def collide_with_walls(self, dx=0, dy=0):
         for wall in self.game.walls:
             if wall.x == self.x + dx and wall.y == self.y + dy:
+                return True
+        return False
+    '''
+    def collide_with_walls(self, dx=0, dy=0):
+        for wall in self.game.walls:
+            if (self.initial_x + dx) * TILESIZE in range(wall.rect.x, wall.rect.x + wall.rect.width) and \
+                    (self.initial_y + dy) * TILESIZE in range(wall.rect.y, wall.rect.y + wall.rect.height):
                 return True
         return False
 
@@ -96,7 +104,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
             else:
                 self.move(dx=1)
 
-
+'''
 class Wall(pygame.sprite.Sprite):
     def __init__(self, game, x, y, image):
         self.groups = game.all_sprites, game.walls
@@ -107,6 +115,15 @@ class Wall(pygame.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+'''
+class Wall():
+    def __init__(self, game, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
 
 
 class Floor(pygame.sprite.Sprite):

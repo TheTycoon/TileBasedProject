@@ -6,7 +6,7 @@ from armors import *
 class Player(Actor, pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         Actor.__init__(self, game, x, y)
-        self.groups = game.all_sprites, game.players
+        self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.initial_x = x
         self.initial_y = y
@@ -92,6 +92,12 @@ class Player(Actor, pygame.sprite.Sprite):
         self.level = 1
         self.experience = 0
         self.next_level = 100
+
+    def draw_sprite(self):
+        temp_rect = self.image.get_rect()
+        temp_rect.x = self.x * TILESIZE
+        temp_rect.y = (self.y - 1) * TILESIZE
+        self.game.screen.blit(self.image, temp_rect)
 
     def draw_character_info(self):
         waiting = True
@@ -246,16 +252,20 @@ class Player(Actor, pygame.sprite.Sprite):
         for i in range(0, self.move_range + 1):
             for j in range(0, self.move_range + 1):
                 if i + j <= self.move_range:
-                    pygame.draw.rect(self.game.screen, YELLOW,
+                    if not self.collide_with_walls(i, j):
+                        pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, YELLOW,
+                    if not self.collide_with_walls(i, -j):
+                        pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x + i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, YELLOW,
+                    if not self.collide_with_walls(-i, j):
+                        pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y + j) * TILESIZE,
                                       TILESIZE, TILESIZE))
-                    pygame.draw.rect(self.game.screen, YELLOW,
+                    if not self.collide_with_walls(-i, -j):
+                        pygame.draw.rect(self.game.screen, YELLOW,
                                      ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
                                       TILESIZE, TILESIZE))
 
