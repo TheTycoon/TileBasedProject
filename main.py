@@ -49,7 +49,7 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'img')
         self.map_folder = path.join(self.game_folder, 'maps')
 
-        self.map = Map(path.join(self.map_folder, 'map2.tmx'))
+        self.map = Map(path.join(self.map_folder, 'map1.tmx'))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
 
