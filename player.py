@@ -273,6 +273,27 @@ class Player(Actor, pygame.sprite.Sprite):
 
     def draw_range_area(self, value, type, color):
 
+        if type == 'filled':
+            for i in range(0, value + 1):
+                for j in range(0, value + 1):
+                    if i + j <= value:
+                        temp_surface = pygame.Surface((TILESIZE, TILESIZE))
+                        temp_rect = temp_surface.get_rect()
+                        temp_surface.fill(color, temp_rect)
+                        temp_surface.set_alpha(100)
+                        temp_rect.x = (self.x + i) * TILESIZE
+                        temp_rect.y = (self.y + j) * TILESIZE
+                        self.game.screen.blit(temp_surface, temp_rect)
+                        temp_rect.x = (self.x + i) * TILESIZE
+                        temp_rect.y = (self.y - j) * TILESIZE
+                        self.game.screen.blit(temp_surface, temp_rect)
+                        temp_rect.x = (self.x - i) * TILESIZE
+                        temp_rect.y = (self.y + j) * TILESIZE
+                        self.game.screen.blit(temp_surface, temp_rect)
+                        temp_rect.x = (self.x - i) * TILESIZE
+                        temp_rect.y = (self.y - j) * TILESIZE
+                        self.game.screen.blit(temp_surface, temp_rect)
+
         if type == 'straight':
             for i in range(value + 1):
                 pygame.draw.rect(self.game.screen, color,
@@ -287,6 +308,7 @@ class Player(Actor, pygame.sprite.Sprite):
                 pygame.draw.rect(self.game.screen, color,
                                  (self.x * TILESIZE, (self.y - i) * TILESIZE,
                                   TILESIZE, TILESIZE))
+        '''
         if type == 'filled':
             for i in range(0, value + 1):
                 for j in range(0, value + 1):
@@ -303,6 +325,7 @@ class Player(Actor, pygame.sprite.Sprite):
                         pygame.draw.rect(self.game.screen, color,
                                          ((self.x - i) * TILESIZE, (self.y - j) * TILESIZE,
                                           TILESIZE, TILESIZE))
+        '''
 
     def take_turn(self, event):
         # All of the actions you can do while able to move around
