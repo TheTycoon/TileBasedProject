@@ -1,4 +1,5 @@
-from settings import *
+import settings
+import pygame
 import random
 
 
@@ -6,8 +7,8 @@ import random
 class Actor:
     def __init__(self, game, x, y):
         self.game = game
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.set_colorkey(BLACK)
+        self.image = pygame.Surface((settings.TILESIZE, settings.TILESIZE))
+        self.image.set_colorkey(settings.BLACK)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -34,17 +35,10 @@ class Actor:
             target.kill()
             self.experience += target.experience_worth
 
-    '''
     def collide_with_walls(self, dx=0, dy=0):
         for wall in self.game.walls:
-            if wall.x == self.x + dx and wall.y == self.y + dy:
-                return True
-        return False
-    '''
-    def collide_with_walls(self, dx=0, dy=0):
-        for wall in self.game.walls:
-            if (self.x + dx) * TILESIZE in range(wall.rect.x, wall.rect.x + wall.rect.width) and \
-                    (self.y + dy) * TILESIZE in range(wall.rect.y, wall.rect.y + wall.rect.height):
+            if (self.x + dx) * settings.TILESIZE in range(wall.rect.x, wall.rect.x + wall.rect.width) and \
+                    (self.y + dy) * settings.TILESIZE in range(wall.rect.y, wall.rect.y + wall.rect.height):
                 return True
         return False
 
@@ -63,10 +57,11 @@ class Actor:
             self.y += dy
 
     def update(self):
-        self.rect.x = self.x * TILESIZE
-        self.rect.y = self.y * TILESIZE
+        self.rect.x = self.x * settings.TILESIZE
+        self.rect.y = self.y * settings.TILESIZE
 
 
+# Think about making a dictionary to hold different enemies and their stats
 class Enemy(Actor, pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         Actor.__init__(self, game, x, y)
@@ -84,7 +79,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
         self.dodge_percent = 0
         self.experience_worth = 10
 
-# Mob AI movement needs to be refined still
+# Mob AI movement needs to be refined still / Probably make different base types of AI
     def take_turn(self):
         if (abs(self.x - self.game.player.x) == 1 and abs(self.y - self.game.player.y) == 0) or \
                 (abs(self.x - self.game.player.x) == 0 and abs(self.y - self.game.player.y) == 1):
@@ -104,18 +99,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
             else:
                 self.move(dx=1)
 
-'''
-class Wall(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, image):
-        self.groups = game.all_sprites, game.walls
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
-'''
+
 class Wall():
     def __init__(self, game, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
@@ -123,16 +107,3 @@ class Wall():
         self.y = y
         self.width = width
         self.height = height
-
-
-
-class Floor(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.floors
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = game.wood_floor
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE

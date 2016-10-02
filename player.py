@@ -1,11 +1,13 @@
-from sprites import *
-from weapons import *
-from armors import *
+import settings
+import pygame
+import sprites
+import weapons
+import armors
 
 
-class Player(Actor, pygame.sprite.Sprite):
+class Player(sprites.Actor, pygame.sprite.Sprite):
     def __init__(self, game, x, y):
-        Actor.__init__(self, game, x, y)
+        sprites.Actor.__init__(self, game, x, y)
         self.groups = game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.initial_x = x
@@ -19,16 +21,16 @@ class Player(Actor, pygame.sprite.Sprite):
         self.turn = 0
 
         # inventory stuff
-        self.melee_weapon = MELEE['none']
-        self.shield = SHIELD['none']
-        self.ranged_weapon = RANGED['none']
-        self.ammo_type = AMMO['none']
+        self.melee_weapon = weapons.MELEE['none']
+        self.shield = armors.SHIELD['none']
+        self.ranged_weapon = weapons.RANGED['none']
+        self.ammo_type = weapons.AMMO['none']
         self.ammo_amount = 0
-        self.helmet = HELMET['none']
-        self.gloves = GLOVES['none']
-        self.chest = CHEST['none']
-        self.legs = LEGS['none']
-        self.boots = BOOTS['none']
+        self.helmet = armors.HELMET['none']
+        self.gloves = armors.GLOVES['none']
+        self.chest = armors.CHEST['none']
+        self.legs = armors.LEGS['none']
+        self.boots = armors.BOOTS['none']
         self.amulet = "-"
         self.ring = "-"
 
@@ -43,8 +45,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.endurance    = 4
             self.wisdom       = 1
             # starting inventory
-            self.melee_weapon = MELEE['rusty_sword']
-            self.legs = LEGS['cloth_pants']
+            self.melee_weapon = weapons.MELEE['rusty_sword']
+            self.legs = armors.LEGS['cloth_pants']
             self.actions = [self.game.sword_icon, self.game.dash_skill_icon]
 
         if event.key == pygame.K_2:
@@ -57,10 +59,10 @@ class Player(Actor, pygame.sprite.Sprite):
             self.endurance    = 3
             self.wisdom       = 2
             # starting inventory
-            self.ranged_weapon = RANGED['slingshot']
-            self.ammo_type = AMMO['rocks']
+            self.ranged_weapon = weapons.RANGED['slingshot']
+            self.ammo_type = weapons.AMMO['rocks']
             self.ammo_amount = 25
-            self.legs = LEGS['cloth_pants']
+            self.legs = armors.LEGS['cloth_pants']
             # starting skills, spells, used for action bar
             self.actions = [self.game.bare_hands_icon, self.game.slingshot_icon]
 
@@ -74,8 +76,8 @@ class Player(Actor, pygame.sprite.Sprite):
             self.endurance    = 2
             self.wisdom       = 4
             # starting inventory
-            self.helmet = HELMET['cloth_hat']
-            self.chest = CHEST['cloth_robe']
+            self.helmet = armors.HELMET['cloth_hat']
+            self.chest = armors.CHEST['cloth_robe']
             self.actions = [self.game.bare_hands_icon, self.game.magic_icon]
 
         # All of the starting derived values based on stats
@@ -96,70 +98,70 @@ class Player(Actor, pygame.sprite.Sprite):
 
     def draw_sprite(self):
         temp_rect = self.image.get_rect()
-        temp_rect.x = self.x * TILESIZE
-        temp_rect.y = (self.y - 1) * TILESIZE
+        temp_rect.x = self.x * settings.TILESIZE
+        temp_rect.y = (self.y - 1) * settings.TILESIZE       # lowers by 1 to handle a 32x64 sprite
         self.game.screen.blit(self.image, temp_rect)
 
     def draw_character_info(self):
         waiting = True
         while waiting:
-            self.game.clock.tick(FPS)
+            self.game.clock.tick(settings.FPS)
 
             # Start Drawing Frame
-            self.game.screen.fill(BLACK)
+            self.game.screen.fill(settings.BLACK)
 
             # Draw Info
             self.game.draw_text(self.game.screen, self.character_class, 32,
-                                LIGHT_BLUE, 10, HEIGHT / 16, False)
+                                settings.LIGHT_BLUE, 10, settings.HEIGHT / 16, False)
 
             self.game.draw_text(self.game.screen, "Level: " + str(self.level), 32,
-                                WHITE, 10, 3 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 3 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Experience: " + str(self.experience), 32,
-                                WHITE, 10, 4 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 4 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Next Level: " + str(self.next_level), 32,
-                                WHITE, 10, 5 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 5 * settings.HEIGHT / 16, False)
 
             self.game.draw_text(self.game.screen, "Basic Attributes", 32,
-                                LIGHT_BLUE, 10, 7 * HEIGHT / 16, False)
+                                settings.LIGHT_BLUE, 10, 7 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Strength    : " + str(self.strength), 32,
-                                WHITE, 10, 8 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 8 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Endurance   : " + str(self.endurance), 32,
-                                WHITE, 10, 9 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 9 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Dexterity   : " + str(self.dexterity), 32,
-                                WHITE, 10, 10 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 10 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Agility     : " + str(self.agility), 32,
-                                WHITE, 10, 11 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 11 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Intelligence: " + str(self.intelligence), 32,
-                                WHITE, 10, 12 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 12 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Wisdom      : " + str(self.wisdom), 32,
-                                WHITE, 10, 13 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 13 * settings.HEIGHT / 16, False)
 
-            pygame.draw.line(self.game.screen, WHITE, (WIDTH / 2 - 5, 0), (WIDTH / 2 - 5, HEIGHT), 5)
+            pygame.draw.line(self.game.screen, settings.WHITE, (settings.WIDTH / 2 - 5, 0), (settings.WIDTH / 2 - 5, settings.HEIGHT), 5)
 
-            self.game.draw_text(self.game.screen, "Derived Attributes", 32, LIGHT_BLUE, WIDTH / 2 + 10, HEIGHT / 16, False)
+            self.game.draw_text(self.game.screen, "Derived Attributes", 32, settings.LIGHT_BLUE, settings.WIDTH / 2 + 10, settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "HP  : " + str(self.current_hit_points) + "/" + str(self.max_hit_points),
-                                32, WHITE, WIDTH / 2 + 10, 3 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 3 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "MP  : " + str(self.current_mana_points) + "/" + str(self.max_mana_points),
-                                32, WHITE, WIDTH / 2 + 10, 4 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 4 * settings.HEIGHT / 16, False)
 
             self.game.draw_text(self.game.screen, "Melee Attack  : " + str(self.melee_attack_power) + "+"
                                 + str(self.melee_weapon['Damage']) + "=" + str(self.melee_attack_power + self.melee_weapon['Damage']),
-                                32, WHITE, WIDTH / 2 + 10, 6 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 6 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Attack : " + str(self.range_attack_power),
-                                32, WHITE, WIDTH / 2 + 10, 7 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 7 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Magic Attack  : " + str(self.magic_attack_power),
-                                32, WHITE, WIDTH / 2 + 10, 8 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 8 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Melee Defense : " + str(self.melee_defense),
-                                32, WHITE, WIDTH / 2 + 10, 9 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 9 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Defense: " + str(self.range_defense),
-                                32, WHITE, WIDTH / 2 + 10, 10 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 10 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Magic Defense : " + str(self.magic_defense),
-                                32, WHITE, WIDTH / 2 + 10, 11 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 11 * settings.HEIGHT / 16, False)
 
             self.game.draw_text(self.game.screen, "Dodge Chance  : " + str(self.agility) + "%",
-                                32, WHITE, WIDTH / 2 + 10, 13 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 13 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Action Points : " + str(self.max_action_points),
-                                32, WHITE, WIDTH / 2 + 10, 14 * HEIGHT / 16, False)
+                                32, settings.WHITE, settings.WIDTH / 2 + 10, 14 * settings.HEIGHT / 16, False)
 
             # End Drawing Frame
             pygame.display.flip()
@@ -181,31 +183,31 @@ class Player(Actor, pygame.sprite.Sprite):
     def draw_inventory(self):
         waiting = True
         while waiting:
-            self.game.clock.tick(FPS)
+            self.game.clock.tick(settings.FPS)
 
             # Start Drawing Frame
-            self.game.screen.fill(BLACK)
+            self.game.screen.fill(settings.BLACK)
 
             self.game.draw_text(self.game.screen, "Inventory", 32,
-                                LIGHT_BLUE, 10, HEIGHT / 16, False)
+                                settings.LIGHT_BLUE, 10, settings.HEIGHT / 16, False)
             # WEAPONS
             self.game.draw_text(self.game.screen, "Melee Weapon : " + self.melee_weapon['Name'], 32,
-                                WHITE, 10, 3 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 3 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Shield       : " + self.shield['Name'], 32,
-                                WHITE, 10, 4 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 4 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ranged Weapon: " + self.ranged_weapon['Name'], 32,
-                                WHITE, 10, 5 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 5 * settings.HEIGHT / 16, False)
             if self.ammo_amount == 0:
                 self.game.draw_text(self.game.screen, "Ammo         : -", 32,
-                                    WHITE, 10, 6 * HEIGHT / 16, False)
+                                    settings.WHITE, 10, 6 * settings.HEIGHT / 16, False)
             else:
                 self.game.draw_text(self.game.screen, "Ammo         : " + str(self.ammo_amount) + " x " + self.ammo_type['Name'], 32,
-                                WHITE, 10, 6 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 6 * settings.HEIGHT / 16, False)
 
                 ammo_icon = self.game.rock_icon
                 ammo_rect = ammo_icon.get_rect()
-                ammo_rect.x = WIDTH / 2
-                ammo_rect.y = 6 * HEIGHT / 16
+                ammo_rect.x = settings.WIDTH / 2
+                ammo_rect.y = 6 * settings.HEIGHT / 16
                 self.game.screen.blit(ammo_icon, ammo_rect)
 
 
@@ -214,19 +216,19 @@ class Player(Actor, pygame.sprite.Sprite):
 
             # ARMOR
             self.game.draw_text(self.game.screen, "Helmet       : " + self.helmet['Name'], 32,
-                                WHITE, 10, 8 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 8 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Gloves       : " + self.gloves['Name'], 32,
-                                WHITE, 10, 9 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 9 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Chest        : " + self.chest['Name'], 32,
-                                WHITE, 10, 10 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 10 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Legs         : " + self.legs['Name'], 32,
-                                WHITE, 10, 11 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 11 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Boots        : " + self.boots['Name'], 32,
-                                WHITE, 10, 12 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 12 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Amulet       : " + self.amulet, 32,
-                                WHITE, 10, 14 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 14 * settings.HEIGHT / 16, False)
             self.game.draw_text(self.game.screen, "Ring         : " + self.ring, 32,
-                                WHITE, 10, 15 * HEIGHT / 16, False)
+                                settings.WHITE, 10, 15 * settings.HEIGHT / 16, False)
 
             # End Drawing Frame
             pygame.display.flip()
@@ -255,107 +257,91 @@ class Player(Actor, pygame.sprite.Sprite):
             for j in range(0, self.current_action_points + 1):
                 if i + j <= self.current_action_points:
                     if not self.collide_with_walls(dx=i, dy=j):
-                        pygame.draw.rect(self.game.screen, YELLOW,
-                                     ((self.initial_x + i) * TILESIZE, (self.initial_y + j) * TILESIZE,
-                                      TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, settings.YELLOW,
+                                     ((self.initial_x + i) * settings.TILESIZE, (self.initial_y + j) * settings.TILESIZE,
+                                      settings.TILESIZE, settings.TILESIZE))
                     if not self.collide_with_walls(dx=i, dy=-j):
-                        pygame.draw.rect(self.game.screen, YELLOW,
-                                     ((self.initial_x + i) * TILESIZE, (self.initial_y - j) * TILESIZE,
-                                      TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, settings.YELLOW,
+                                     ((self.initial_x + i) * settings.TILESIZE, (self.initial_y - j) * settings.TILESIZE,
+                                      settings.TILESIZE, settings.TILESIZE))
                     if not self.collide_with_walls(dx=-i, dy=j):
-                        pygame.draw.rect(self.game.screen, YELLOW,
-                                     ((self.initial_x - i) * TILESIZE, (self.initial_y + j) * TILESIZE,
-                                      TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, settings.YELLOW,
+                                     ((self.initial_x - i) * settings.TILESIZE, (self.initial_y + j) * settings.TILESIZE,
+                                      settings.TILESIZE, settings.TILESIZE))
                     if not self.collide_with_walls(dx=-i, dy=-j):
-                        pygame.draw.rect(self.game.screen, YELLOW,
-                                     ((self.initial_x - i) * TILESIZE, (self.initial_y - j) * TILESIZE,
-                                      TILESIZE, TILESIZE))
+                        pygame.draw.rect(self.game.screen, settings.YELLOW,
+                                     ((self.initial_x - i) * settings.TILESIZE, (self.initial_y - j) * settings.TILESIZE,
+                                      settings.TILESIZE, settings.TILESIZE))
 
     def draw_range_area(self, value, type, color):
 
+        # change name from filled to radius
         if type == 'filled':
             for i in range(0, value + 1):
                 for j in range(0, value + 1):
                     if i + j <= value:
-                        temp_surface = pygame.Surface((TILESIZE, TILESIZE))
+                        temp_surface = pygame.Surface((settings.TILESIZE, settings.TILESIZE))
                         temp_rect = temp_surface.get_rect()
                         temp_surface.fill(color, temp_rect)
                         temp_surface.set_alpha(100)
 
                         if i == 0 and j != 0:
-                            temp_rect.x = self.x * TILESIZE
-                            temp_rect.y = (self.y + j) * TILESIZE
+                            temp_rect.x = self.x * settings.TILESIZE
+                            temp_rect.y = (self.y + j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
-                            temp_rect.x = self.x * TILESIZE
-                            temp_rect.y = (self.y - j) * TILESIZE
+                            temp_rect.x = self.x * settings.TILESIZE
+                            temp_rect.y = (self.y - j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
                         elif i != 0 and j == 0:
-                            temp_rect.x = (self.x + i) * TILESIZE
-                            temp_rect.y = self.y * TILESIZE
+                            temp_rect.x = (self.x + i) * settings.TILESIZE
+                            temp_rect.y = self.y * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
-                            temp_rect.x = (self.x - i) * TILESIZE
-                            temp_rect.y = self.y * TILESIZE
+                            temp_rect.x = (self.x - i) * settings.TILESIZE
+                            temp_rect.y = self.y * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
                         else:
-                            temp_rect.x = (self.x + i) * TILESIZE
-                            temp_rect.y = (self.y + j) * TILESIZE
+                            temp_rect.x = (self.x + i) * settings.TILESIZE
+                            temp_rect.y = (self.y + j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
-                            temp_rect.x = (self.x + i) * TILESIZE
-                            temp_rect.y = (self.y - j) * TILESIZE
+                            temp_rect.x = (self.x + i) * settings.TILESIZE
+                            temp_rect.y = (self.y - j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
-                            temp_rect.x = (self.x - i) * TILESIZE
-                            temp_rect.y = (self.y + j) * TILESIZE
+                            temp_rect.x = (self.x - i) * settings.TILESIZE
+                            temp_rect.y = (self.y + j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
-                            temp_rect.x = (self.x - i) * TILESIZE
-                            temp_rect.y = (self.y - j) * TILESIZE
+                            temp_rect.x = (self.x - i) * settings.TILESIZE
+                            temp_rect.y = (self.y - j) * settings.TILESIZE
                             self.game.screen.blit(temp_surface, temp_rect)
 
         if type == 'straight':
             for i in range(value + 1):
-                temp_surface = pygame.Surface((TILESIZE, TILESIZE))
+                temp_surface = pygame.Surface((settings.TILESIZE, settings.TILESIZE))
                 temp_rect = temp_surface.get_rect()
                 temp_surface.fill(color, temp_rect)
                 temp_surface.set_alpha(100)
 
-                temp_rect.x = self.x * TILESIZE
-                temp_rect.y = (self.y + i) * TILESIZE
+                temp_rect.x = self.x * settings.TILESIZE
+                temp_rect.y = (self.y + i) * settings.TILESIZE
                 self.game.screen.blit(temp_surface, temp_rect)
 
-                temp_rect.x = self.x * TILESIZE
-                temp_rect.y = (self.y - i) * TILESIZE
+                temp_rect.x = self.x * settings.TILESIZE
+                temp_rect.y = (self.y - i) * settings.TILESIZE
                 self.game.screen.blit(temp_surface, temp_rect)
 
-                temp_rect.x = (self.x + i) * TILESIZE
-                temp_rect.y = self.y * TILESIZE
+                temp_rect.x = (self.x + i) * settings.TILESIZE
+                temp_rect.y = self.y * settings.TILESIZE
                 self.game.screen.blit(temp_surface, temp_rect)
 
-                temp_rect.x = (self.x - i) * TILESIZE
-                temp_rect.y = self.y * TILESIZE
+                temp_rect.x = (self.x - i) * settings.TILESIZE
+                temp_rect.y = self.y * settings.TILESIZE
                 self.game.screen.blit(temp_surface, temp_rect)
-
-        '''
-        if type == 'straight':
-            for i in range(value + 1):
-                pygame.draw.rect(self.game.screen, color,
-                                 ((self.x + i) * TILESIZE, self.y * TILESIZE,
-                                  TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, color,
-                                 ((self.x - i) * TILESIZE, self.y * TILESIZE,
-                                  TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, color,
-                                 (self.x * TILESIZE, (self.y + i) * TILESIZE,
-                                  TILESIZE, TILESIZE))
-                pygame.draw.rect(self.game.screen, color,
-                                 (self.x * TILESIZE, (self.y - i) * TILESIZE,
-                                  TILESIZE, TILESIZE))
-        '''
 
     def take_turn(self, event):
         # All of the actions you can do while able to move around
@@ -383,6 +369,7 @@ class Player(Actor, pygame.sprite.Sprite):
                     if self.current_action_points <= 0:
                         self.game.machine.end_player_turn()
 
+                # Use Actions in Action Bar
                 if event.key == pygame.K_1:
                     self.targets = []
                     for mob in self.game.mobs:
@@ -402,6 +389,7 @@ class Player(Actor, pygame.sprite.Sprite):
                         self.selected_mob = self.targets[0]
                         self.game.machine.player_magic()
 
+                # Other actions (wait, open menus, etc.)
                 if event.key == pygame.K_SPACE:
                     self.turn += 1
                     self.game.machine.end_player_turn()

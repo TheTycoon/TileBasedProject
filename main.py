@@ -1,8 +1,12 @@
-from pygame.locals import *
+import pygame
 from os import path
-from player import *
-from tilemap import *
 from transitions.extensions import HierarchicalMachine as Machine
+
+import settings
+import player
+import sprites
+import tilemap
+import button
 
 
 class Game:
@@ -10,9 +14,10 @@ class Game:
         # initialize game window, sound interaction, etc
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption(TITLE)
+        self.screen = pygame.display.set_mode((settings.WIDTH, settings.HEIGHT))
+        pygame.display.set_caption(settings.TITLE)
         self.clock = pygame.time.Clock()    # start the clock...
+        self.mouse = pygame.mouse
         self.running = True
         self.load_data()
 
@@ -50,7 +55,7 @@ class Game:
         self.map_folder = path.join(self.game_folder, 'maps')
 
         # load Tiled map stuff
-        self.map = Map(path.join(self.map_folder, 'map1.tmx'))
+        self.map = tilemap.Map(path.join(self.map_folder, 'map1.tmx'))
         self.map_img = self.map.make_map()
         self.map_rect = self.map_img.get_rect()
 
@@ -76,19 +81,19 @@ class Game:
         # Initialize Map Objects
         for tile_object in self.map.tmxdata.objects:
             if tile_object.name == 'player':
-                self.player = Player(self, tile_object.x / TILESIZE, tile_object.y / TILESIZE)
+                self.player = player.Player(self, tile_object.x / settings.TILESIZE, tile_object.y / settings.TILESIZE)
             if tile_object.name == 'wall':
-                wall = Wall(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+                wall = sprites.Wall(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
                 self.walls.append(wall)
             if tile_object.name == 'mob':
-                Enemy(self, tile_object.x / TILESIZE, tile_object.y / TILESIZE)
+                sprites.Enemy(self, tile_object.x / settings.TILESIZE, tile_object.y / settings.TILESIZE)
 
     def run(self):
         self.playing = True
 
         # Game Loop
         while self.playing:
-            self.clock.tick(FPS)
+            self.clock.tick(settings.FPS)
             self.events()
             self.update()
             self.draw()
@@ -122,18 +127,18 @@ class Game:
                 self.machine.end_enemy_turn()
 
     def draw_grid(self):
-        for x in range(0, WIDTH, TILESIZE):
-            pygame.draw.line(self.screen, WHITE, (x, 0), (x, HEIGHT))
+        for x in range(0, settings.WIDTH, settings.TILESIZE):
+            pygame.draw.line(self.screen, settings.WHITE, (x, 0), (x, settings.HEIGHT))
 
-        for y in range(0, HEIGHT, TILESIZE):
-            pygame.draw.line(self.screen, WHITE, (0, y), (WIDTH, y))
+        for y in range(0, settings.HEIGHT, settings.TILESIZE):
+            pygame.draw.line(self.screen, settings.WHITE, (0, y), (settings.WIDTH, y))
 
     # Double Check These Functions / Make Better - Use x & y to draw text position as well
     def draw_bar(self, self_screen, x, y, percentage, type):
         if type == 'health':
-            color = RED
+            color = settings.RED
         if type == 'mana':
-            color = BLUE
+            color = settings.BLUE
         if percentage < 0:
             percentage = 0
         BAR_LENGTH = 100
@@ -142,57 +147,62 @@ class Game:
         outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
         filled_rect = pygame.Rect(x, y, filled, BAR_HEIGHT)
         pygame.draw.rect(self_screen, color, filled_rect)
-        pygame.draw.rect(self_screen, WHITE, outline_rect, 2)
+        pygame.draw.rect(self_screen, settings.WHITE, outline_rect, 2)
 
         if type == 'health':
             self.draw_text(self.screen, "Health: " + str(self.player.current_hit_points) + "/" + str(self.player.max_hit_points),
-                           14, WHITE, WIDTH - 175, HEIGHT - 38, True)
+                           14, settings.WHITE, settings.WIDTH - 175, settings.HEIGHT - 38, True)
         if type == 'mana':
             self.draw_text(self.screen, "Mana: " + str(self.player.current_mana_points) + "/" + str(self.player.max_mana_points),
-                           14, WHITE, WIDTH - 175, HEIGHT - 23, True)
+                           14, settings.WHITE, settings.WIDTH - 175, settings.HEIGHT - 23, True)
 
     def draw_enemy_info(self):
         image = self.player.selected_mob.image
         image_rect = image.get_rect()
-        image_rect.x = WIDTH / 2
-        image_rect.y = HEIGHT - 36
+        image_rect.x = settings.WIDTH / 2
+        image_rect.y = settings.HEIGHT - 36
         self.screen.blit(image, image_rect)
-        self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 14, WHITE, WIDTH / 2 + 50, HEIGHT - 36, False)
-        self.draw_bar(self.screen, WIDTH / 2 + 50, HEIGHT - 20,
+        self.draw_text(self.screen, (self.player.selected_mob.name + ": Level " + str(self.player.selected_mob.level)), 14, settings.WHITE, settings.WIDTH / 2 + 50, settings.HEIGHT - 36, False)
+        self.draw_bar(self.screen, settings.WIDTH / 2 + 50, settings.HEIGHT - 20,
                       self.player.selected_mob.current_hit_points / self.player.selected_mob.max_hit_points, 'health')
 
     def draw_ui(self):
         # Draw Empty Action Bar
-        pygame.draw.rect(self.screen, GRAY, (0, HEIGHT - 40, WIDTH, 40))
+        self.buttons = []
+        pygame.draw.rect(self.screen, settings.GRAY, (0, settings.HEIGHT - 40, settings.WIDTH, 40))
         for i in range(10):
-            pygame.draw.rect(self.screen, SILVER, (5 + ((5 + TILESIZE) * i), HEIGHT - 36, 32, 32))
+            #pygame.draw.rect(self.screen, SILVER, (5 + ((5 + TILESIZE) * i), HEIGHT - 36, 32, 32))
+            temp_button = button.Button(5 + ((5 + settings.TILESIZE) * i), settings.HEIGHT - 36, 32, 32)
+            temp_button.draw_button(self.screen, self.mouse)
+            self.buttons.append(temp_button)
+
 
         # Draw Icons in Action Bar
         for i in range(0, len(self.player.actions)):
             temp_icon = self.player.actions[i]
             temp_rect = temp_icon.get_rect()
-            temp_rect.x = 5 + (5 + TILESIZE) * i
-            temp_rect.y = HEIGHT - 36
+            temp_rect.x = 5 + (5 + settings.TILESIZE) * i
+            temp_rect.y = settings.HEIGHT - 36
             self.screen.blit(temp_icon, temp_rect)
 
         # Draw Numbers in Action Bar
         for i in range(10):
-            self.draw_text(self.screen, str((i + 1) % 10), 12, BLACK, 10 + ((5 + TILESIZE) * i), HEIGHT - 36, True)
+            self.draw_text(self.screen, str((i + 1) % 10), 12, settings.BLACK, 10 + ((5 + settings.TILESIZE) * i), settings.HEIGHT - 36, True)
 
         # Draw Health and Mana Bars
-        self.draw_bar(self.screen, WIDTH - 105, HEIGHT - 35,
+        self.draw_bar(self.screen, settings.WIDTH - 105, settings.HEIGHT - 35,
                       self.player.current_hit_points / self.player.max_hit_points, 'health')
-        self.draw_bar(self.screen, WIDTH - 105, HEIGHT - 20,
+        self.draw_bar(self.screen, settings.WIDTH - 105, settings.HEIGHT - 20,
                       self.player.current_mana_points / self.player.max_mana_points, 'mana')
 
         # Draw a box to highlight the selected enemy and show enemy info in action bar
         if self.machine.state == 'player_turn_attack' or self.machine.state == 'player_turn_magic':
-            pygame.draw.rect(self.screen, ORANGE, self.player.selected_mob.rect, 3)
+            pygame.draw.rect(self.screen, settings.ORANGE, self.player.selected_mob.rect, 3)
             self.draw_enemy_info()
 
     # function to handle drawing all types text
     def draw_text(self, surface, text, size, color, x, y, centered):
-        font = pygame.font.Font(FONT, size)
+        font = pygame.font.Font(settings.FONT, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.x = x
@@ -206,7 +216,6 @@ class Game:
         pygame.display.set_caption("{:.2f}".format(self.clock.get_fps()))
 
         # DRAW EVERYTHING FOR ONE FRAME
-        #self.screen.fill(BLACK)
         self.screen.blit(self.map_img, self.map_rect)
 
         # Draw the correct state (Basically the world or a menu)
@@ -215,17 +224,16 @@ class Game:
         elif self.machine.state == 'menu_inventory':
             self.player.draw_inventory()
         else:
-            # Draw all sprites, the grid, and the UI
-            #self.draw_grid()
+            # Draw all sprites, and the UI
 
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
                 #self.player.draw_move_area()
-                self.player.draw_range_area(self.player.current_action_points, 'filled', YELLOW)
+                self.player.draw_range_area(self.player.current_action_points, 'filled', settings.YELLOW)
             if self.machine.state == 'player_turn_attack':
-                self.player.draw_range_area(self.player.attack_range, 'straight', RED)
+                self.player.draw_range_area(self.player.attack_range, 'straight', settings.RED)
             if self.machine.state == 'player_turn_magic':
-                self.player.draw_range_area(self.player.spell_range, 'filled', LIGHT_BLUE)
+                self.player.draw_range_area(self.player.spell_range, 'filled', settings.LIGHT_BLUE)
 
             self.mobs.draw(self.screen)
 
@@ -241,14 +249,14 @@ class Game:
     def show_start_screen(self):
         waiting = True
         while waiting:
-            self.clock.tick(FPS)
+            self.clock.tick(settings.FPS)
 
             # Draw All Text To Screen
-            self.draw_text(self.screen, TITLE, 64, WHITE, WIDTH / 2, HEIGHT / 4, True)
-            self.draw_text(self.screen, "Choose a Class", 40, WHITE, WIDTH / 2, HEIGHT / 2, True)
-            self.draw_text(self.screen, "1. Warrior", 28, WHITE, WIDTH / 8, 3 * HEIGHT / 4, True)
-            self.draw_text(self.screen, "2. Archer", 28, WHITE, WIDTH / 2, 3 * HEIGHT / 4, True)
-            self.draw_text(self.screen, "3. Mage", 28, WHITE, 7 * WIDTH / 8, 3 * HEIGHT / 4, True)
+            self.draw_text(self.screen, settings.TITLE, 64, settings.WHITE, settings.WIDTH / 2, settings.HEIGHT / 4, True)
+            self.draw_text(self.screen, "Choose a Class", 40, settings.WHITE, settings.WIDTH / 2, settings.HEIGHT / 2, True)
+            self.draw_text(self.screen, "1. Warrior", 28, settings.WHITE, settings.WIDTH / 8, 3 * settings.HEIGHT / 4, True)
+            self.draw_text(self.screen, "2. Archer", 28, settings.WHITE, settings.WIDTH / 2, 3 * settings.HEIGHT / 4, True)
+            self.draw_text(self.screen, "3. Mage", 28, settings.WHITE, 7 * settings.WIDTH / 8, 3 * settings.HEIGHT / 4, True)
             pygame.display.flip()
 
             # Get Events / Player Chooses Their Class
@@ -259,11 +267,11 @@ class Game:
                     self.running = False
                 # All keydown events
                 if event.type == pygame.KEYDOWN:
-                    if event.key == K_1 or event.key == K_2 or event.key == K_3:
+                    if event.key == pygame.K_1 or event.key == pygame.K_2 or event.key == pygame.K_3:
                         self.player.assign_class(event)
                         waiting = False
 
-                    if event.key == K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE:
                         waiting = False
                         self.running = False
 

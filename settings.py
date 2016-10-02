@@ -1,7 +1,5 @@
 import pygame
 
-# Game Options and Settings
-
 # define colors
 WHITE      = (255, 255, 255)
 BLACK      = (  0,   0,   0)
