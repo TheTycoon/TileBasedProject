@@ -107,7 +107,7 @@ class Game:
         for event in pygame.event.get():
 
             # quit event / close window
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 if self.playing:
                     self.playing = False
                 self.running = False
