@@ -3,6 +3,7 @@ import pygame
 import sprites
 import weapons
 import armors
+import skills
 
 
 class Player(sprites.Actor, pygame.sprite.Sprite):
@@ -48,6 +49,10 @@ class Player(sprites.Actor, pygame.sprite.Sprite):
             self.melee_weapon = weapons.MELEE['rusty_sword']
             self.legs = armors.LEGS['cloth_pants']
             self.actions = [self.game.sword_icon, self.game.dash_skill_icon]
+
+            # starting skills - WIP
+            self.skills = [skills.SKILL['Melee Attack']]
+
 
         if event.key == pygame.K_2:
             self.character_class = "Archer"
@@ -252,31 +257,8 @@ class Player(sprites.Actor, pygame.sprite.Sprite):
         self.initial_y = self.y
         self.current_action_points = self.max_action_points
 
-    def draw_move_area(self):
-        for i in range(0, self.current_action_points + 1):
-            for j in range(0, self.current_action_points + 1):
-                if i + j <= self.current_action_points:
-                    if not self.collide_with_walls(dx=i, dy=j):
-                        pygame.draw.rect(self.game.screen, settings.YELLOW,
-                                     ((self.initial_x + i) * settings.TILESIZE, (self.initial_y + j) * settings.TILESIZE,
-                                      settings.TILESIZE, settings.TILESIZE))
-                    if not self.collide_with_walls(dx=i, dy=-j):
-                        pygame.draw.rect(self.game.screen, settings.YELLOW,
-                                     ((self.initial_x + i) * settings.TILESIZE, (self.initial_y - j) * settings.TILESIZE,
-                                      settings.TILESIZE, settings.TILESIZE))
-                    if not self.collide_with_walls(dx=-i, dy=j):
-                        pygame.draw.rect(self.game.screen, settings.YELLOW,
-                                     ((self.initial_x - i) * settings.TILESIZE, (self.initial_y + j) * settings.TILESIZE,
-                                      settings.TILESIZE, settings.TILESIZE))
-                    if not self.collide_with_walls(dx=-i, dy=-j):
-                        pygame.draw.rect(self.game.screen, settings.YELLOW,
-                                     ((self.initial_x - i) * settings.TILESIZE, (self.initial_y - j) * settings.TILESIZE,
-                                      settings.TILESIZE, settings.TILESIZE))
-
     def draw_range_area(self, value, type, color):
-
-        # change name from filled to radius
-        if type == 'filled':
+        if type == 'radius':
             for i in range(0, value + 1):
                 for j in range(0, value + 1):
                     if i + j <= value:
@@ -284,6 +266,13 @@ class Player(sprites.Actor, pygame.sprite.Sprite):
                         temp_rect = temp_surface.get_rect()
                         temp_surface.fill(color, temp_rect)
                         temp_surface.set_alpha(100)
+
+                        '''
+                        Consider adding a list of these temp_rects and then
+                        checking that list versus the list of wall tiles
+                        coordinates...
+                        draw the list at the end?
+                        '''
 
                         if i == 0 and j != 0:
                             temp_rect.x = self.x * settings.TILESIZE
@@ -411,7 +400,7 @@ class Player(sprites.Actor, pygame.sprite.Sprite):
                     self.game.machine.cancel_attack()
 
                 if event.key == pygame.K_RETURN:
-                    self.attack(self.selected_mob)
+                    skills.melee_attack(self, self.selected_mob)
                     self.turn += 1
                     self.game.machine.end_player_turn()
 

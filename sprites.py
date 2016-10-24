@@ -1,6 +1,7 @@
 import settings
 import pygame
 import random
+import skills
 
 
 # Generic Base Class for Player and Enemies
@@ -13,19 +14,6 @@ class Actor:
         self.x = x
         self.y = y
 
-    def attack(self, target):
-        if random.randint(0, 99) <= target.dodge_percent:
-            damage = 0
-            print("Dodged!")
-        else:
-            damage = self.melee_attack_power - target.melee_defense
-            if damage <= 0:
-                damage = 1
-        target.current_hit_points -= damage
-
-        if target.current_hit_points <= 0:
-            target.kill()
-            self.experience += target.experience_worth
 
     def magic_attack(self, target):
         self.current_mana_points -= 5
@@ -83,7 +71,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
     def take_turn(self):
         if (abs(self.x - self.game.player.x) == 1 and abs(self.y - self.game.player.y) == 0) or \
                 (abs(self.x - self.game.player.x) == 0 and abs(self.y - self.game.player.y) == 1):
-            self.attack(self.game.player)
+            skills.melee_attack(self, self.game.player)
             print(self.game.player.current_hit_points)
         elif abs(self.x - self.game.player.x) > abs(self.y - self.game.player.y) and self.x - self.game.player.x > 0:
             self.move(dx=-1)
@@ -101,7 +89,7 @@ class Enemy(Actor, pygame.sprite.Sprite):
 
 
 class Wall():
-    def __init__(self, game, x, y, width, height):
+    def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
         self.x = x
         self.y = y

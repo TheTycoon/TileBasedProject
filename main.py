@@ -75,7 +75,7 @@ class Game:
         # Declare Sprite Groups
         self.all_sprites = pygame.sprite.Group()
         self.mobs = pygame.sprite.Group()
-        # Make a list of walls, maybe change these to be call obstacles
+        # Make a list of walls, maybe change these to be called obstacles
         self.walls = []
 
         # Initialize Map Objects
@@ -83,7 +83,7 @@ class Game:
             if tile_object.name == 'player':
                 self.player = player.Player(self, tile_object.x / settings.TILESIZE, tile_object.y / settings.TILESIZE)
             if tile_object.name == 'wall':
-                wall = sprites.Wall(self, tile_object.x, tile_object.y, tile_object.width, tile_object.height)
+                wall = sprites.Wall(tile_object.x, tile_object.y, tile_object.width, tile_object.height)
                 self.walls.append(wall)
             if tile_object.name == 'mob':
                 sprites.Enemy(self, tile_object.x / settings.TILESIZE, tile_object.y / settings.TILESIZE)
@@ -176,14 +176,25 @@ class Game:
             temp_button.draw_button(self.screen, self.mouse)
             self.buttons.append(temp_button)
 
-
         # Draw Icons in Action Bar
+        '''
         for i in range(0, len(self.player.actions)):
             temp_icon = self.player.actions[i]
             temp_rect = temp_icon.get_rect()
             temp_rect.x = 5 + (5 + settings.TILESIZE) * i
             temp_rect.y = settings.HEIGHT - 36
             self.screen.blit(temp_icon, temp_rect)
+        '''
+
+        # trying to redo this icons in action bar using a set/list of skills from a dictionary
+
+        for i in range(len(self.player.skills)):
+            temp_icon = self.player.skills[i]['Image']
+            temp_rect = temp_icon.get_rect()
+            temp_rect.x = 5 + (5 + settings.TILESIZE) * i
+            temp_rect.y = settings.HEIGHT - 36
+            self.screen.blit(temp_icon, temp_rect)
+
 
         # Draw Numbers in Action Bar
         for i in range(10):
@@ -228,18 +239,16 @@ class Game:
 
             # Draw highlighted area depending on what action is happening
             if self.machine.state == 'player_turn_moving':
-                #self.player.draw_move_area()
-                self.player.draw_range_area(self.player.current_action_points, 'filled', settings.YELLOW)
+                self.player.draw_range_area(self.player.current_action_points, 'radius', settings.YELLOW)
             if self.machine.state == 'player_turn_attack':
                 self.player.draw_range_area(self.player.attack_range, 'straight', settings.RED)
             if self.machine.state == 'player_turn_magic':
-                self.player.draw_range_area(self.player.spell_range, 'filled', settings.LIGHT_BLUE)
+                self.player.draw_range_area(self.player.spell_range, 'radius', settings.LIGHT_BLUE)
 
             self.mobs.draw(self.screen)
 
             #self.players.draw(self.screen)
             self.player.draw_sprite()
-
 
             self.draw_ui()
 
